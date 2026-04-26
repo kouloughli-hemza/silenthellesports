@@ -1,0 +1,20 @@
+import { defineRouting } from "next-intl/routing";
+import { createNavigation } from "next-intl/navigation";
+
+export const routing = defineRouting({
+  locales: ["en", "ar"] as const,
+  defaultLocale: "en",
+  localePrefix: "always",
+});
+
+export type Locale = (typeof routing.locales)[number];
+
+export const { Link, redirect, usePathname, useRouter, getPathname } = createNavigation(routing);
+
+export function isLocale(value: string): value is Locale {
+  return (routing.locales as readonly string[]).includes(value);
+}
+
+export function dirFor(locale: Locale): "ltr" | "rtl" {
+  return locale === "ar" ? "rtl" : "ltr";
+}

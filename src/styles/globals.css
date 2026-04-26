@@ -1,0 +1,944 @@
+@import "tailwindcss";
+
+/* =============================================================================
+   Silent Hell Esports — globals
+   Ported from silenthell-design/project/styles.css. Tokens in :root,
+   RTL-aware typography swaps via [dir="rtl"], all keyframes preserved.
+   ============================================================================= */
+
+@theme {
+  --color-black: #0a0a0a;
+  --color-hell-red: #e60013;
+  --color-ember: #ff4500;
+  --color-bone: #f5f0e8;
+  --color-ash-1: #1f1f1f;
+  --color-ash-2: #2a2a2a;
+  --color-ash-3: #141414;
+
+  --font-display: var(--font-saira), "Arial Narrow", sans-serif;
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), monospace;
+}
+
+:root {
+  --black: #0a0a0a;
+  --hell-red: #e60013;
+  --ember: #ff4500;
+  --bone: #f5f0e8;
+  --ash-1: #1f1f1f;
+  --ash-2: #2a2a2a;
+  --ash-3: #141414;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--black);
+  color: var(--bone);
+  font-family: var(--font-inter), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+body {
+  cursor: none;
+}
+
+button,
+a,
+input,
+textarea,
+select {
+  cursor: none;
+}
+
+@media (max-width: 768px) {
+  body,
+  button,
+  a,
+  input,
+  textarea,
+  select {
+    cursor: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body,
+  button,
+  a,
+  input,
+  textarea,
+  select {
+    cursor: auto;
+  }
+}
+
+.font-display {
+  font-family: var(--font-saira), "Arial Narrow", sans-serif;
+  font-style: italic;
+  letter-spacing: 0.005em;
+}
+
+.font-mono {
+  font-family: var(--font-jetbrains), monospace;
+}
+
+/* RTL Arabic typography
+   Arabic letters connect via cursive ligatures. Any positive letter-spacing
+   breaks those joins and makes the text unreadable. Reset tracking aggressively
+   across every class that we set letter-spacing on for the LTR side. */
+[dir="rtl"] {
+  font-family: var(--font-cairo), system-ui, sans-serif;
+  font-weight: 500;
+  line-height: 1.7;
+}
+[dir="rtl"] .font-display {
+  font-family: var(--font-reem-kufi), var(--font-cairo), sans-serif;
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1.2;
+}
+[dir="rtl"] .font-mono {
+  font-family: var(--font-cairo), system-ui, sans-serif;
+  letter-spacing: 0;
+}
+[dir="rtl"] .btn-hell,
+[dir="rtl"] .btn-ghost {
+  font-family: var(--font-reem-kufi), var(--font-cairo), sans-serif;
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+[dir="rtl"] .section-label,
+[dir="rtl"] .field-label,
+[dir="rtl"] .field-error,
+[dir="rtl"] .ticker-item,
+[dir="rtl"] .badge-hot {
+  letter-spacing: 0;
+  font-family: var(--font-cairo), system-ui, sans-serif;
+}
+/* Kill tracking on tailwind utility tracking classes when in RTL */
+[dir="rtl"] .tracking-wide,
+[dir="rtl"] .tracking-wider,
+[dir="rtl"] .tracking-widest,
+[dir="rtl"] [class*="tracking-["],
+[dir="rtl"] [style*="letter-spacing"] {
+  letter-spacing: 0 !important;
+}
+/* Uppercase has no effect in Arabic — but normal-case is safer and cleaner */
+[dir="rtl"] .uppercase {
+  text-transform: none;
+}
+[dir="rtl"] .ticker-track {
+  animation-direction: reverse;
+}
+[dir="rtl"] .slash-divider::before,
+[dir="rtl"] .slash-divider::after {
+  transform: scaleX(-1);
+}
+
+/* Skip-to-content */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 8px;
+  padding: 12px 18px;
+  background: var(--hell-red);
+  color: var(--bone);
+  font-family: var(--font-saira), sans-serif;
+  font-style: italic;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  z-index: 10000;
+}
+.skip-link:focus {
+  left: 8px;
+}
+
+/* Diagonal slash divider */
+.slash-divider {
+  position: relative;
+  height: 80px;
+  background: var(--black);
+  overflow: hidden;
+}
+.slash-divider::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 0%,
+    transparent 48%,
+    var(--hell-red) 48%,
+    var(--hell-red) 49%,
+    transparent 49%,
+    transparent 100%
+  );
+}
+.slash-divider::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 0%,
+    transparent 52%,
+    var(--hell-red) 52%,
+    var(--hell-red) 52.3%,
+    transparent 52.3%,
+    transparent 100%
+  );
+  opacity: 0.4;
+}
+
+/* Section labels */
+.section-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-jetbrains), monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  color: var(--hell-red);
+  text-transform: uppercase;
+}
+.section-label::before {
+  content: "";
+  width: 32px;
+  height: 1px;
+  background: var(--hell-red);
+}
+
+/* Reticle brackets */
+.reticle {
+  position: relative;
+}
+.reticle::before,
+.reticle::after {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-color: var(--hell-red);
+  border-style: solid;
+  border-width: 0;
+}
+.reticle::before {
+  top: -6px;
+  left: -6px;
+  border-top-width: 2px;
+  border-left-width: 2px;
+}
+.reticle::after {
+  bottom: -6px;
+  right: -6px;
+  border-bottom-width: 2px;
+  border-right-width: 2px;
+}
+
+/* Film grain */
+.grain {
+  position: relative;
+}
+.grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.96  0 0 0 0 0.94  0 0 0 0 0.91  0 0 0 0.5 0'/></filter><rect width='200' height='200' filter='url(%23n)' opacity='0.5'/></svg>");
+  mix-blend-mode: overlay;
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* Ticker */
+@keyframes ticker-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.ticker-track {
+  display: inline-flex;
+  white-space: nowrap;
+  animation: ticker-scroll 40s linear infinite;
+  gap: 0;
+}
+
+/* Ember particles */
+@keyframes ember-rise {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translate(var(--drift), -100vh) scale(0.3);
+    opacity: 0;
+  }
+}
+.ember {
+  position: absolute;
+  bottom: -10px;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--ember);
+  box-shadow:
+    0 0 8px var(--ember),
+    0 0 16px var(--hell-red);
+  animation: ember-rise linear infinite;
+  pointer-events: none;
+}
+
+/* Card hover bite + glitch flicker */
+.card-bite {
+  transition:
+    transform 280ms cubic-bezier(0.2, 0.9, 0.3, 1.2),
+    box-shadow 280ms ease;
+  position: relative;
+  will-change: transform;
+}
+.card-bite:hover {
+  transform: perspective(900px) rotateX(2deg) rotateY(-3deg) translateY(-4px);
+  box-shadow:
+    0 18px 40px -12px rgba(230, 0, 19, 0.45),
+    0 0 0 1px var(--hell-red);
+}
+
+@keyframes glitch-flicker {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  20% {
+    transform: translate(-1px, 1px);
+  }
+  40% {
+    transform: translate(1px, -1px);
+  }
+  60% {
+    transform: translate(-1px, 0);
+  }
+  80% {
+    transform: translate(0, 1px);
+  }
+}
+.card-bite:hover .glitch-target {
+  animation: glitch-flicker 220ms steps(2, end) 1;
+}
+
+/* Sharp corners w/ angular notch */
+.notch {
+  clip-path: polygon(
+    0 0,
+    calc(100% - 16px) 0,
+    100% 16px,
+    100% 100%,
+    16px 100%,
+    0 calc(100% - 16px)
+  );
+}
+.notch-sm {
+  clip-path: polygon(
+    0 0,
+    calc(100% - 10px) 0,
+    100% 10px,
+    100% 100%,
+    10px 100%,
+    0 calc(100% - 10px)
+  );
+}
+
+/* Buttons */
+.btn-hell {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 28px;
+  background: var(--hell-red);
+  color: var(--bone);
+  font-family: var(--font-saira), sans-serif;
+  font-style: italic;
+  font-weight: 800;
+  font-size: 16px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: none;
+  position: relative;
+  transition: all 200ms ease;
+  clip-path: polygon(
+    0 0,
+    calc(100% - 12px) 0,
+    100% 12px,
+    100% 100%,
+    12px 100%,
+    0 calc(100% - 12px)
+  );
+}
+.btn-hell:hover:not(:disabled) {
+  background: linear-gradient(135deg, var(--hell-red), var(--ember));
+  letter-spacing: 0.12em;
+}
+.btn-hell:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.btn-hell:focus-visible {
+  outline: 2px solid var(--bone);
+  outline-offset: 3px;
+}
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 26px;
+  background: transparent;
+  color: var(--bone);
+  font-family: var(--font-saira), sans-serif;
+  font-style: italic;
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1.5px solid rgba(245, 240, 232, 0.25);
+  transition: all 200ms ease;
+}
+.btn-ghost:hover:not(:disabled) {
+  border-color: var(--hell-red);
+  color: var(--hell-red);
+}
+.btn-ghost:focus-visible {
+  outline: 2px solid var(--hell-red);
+  outline-offset: 3px;
+}
+
+/* Custom cursor */
+.cursor-dot {
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--hell-red);
+  pointer-events: none;
+  z-index: 9999;
+  mix-blend-mode: normal;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition:
+    width 150ms,
+    height 150ms,
+    background 150ms,
+    opacity 200ms;
+}
+.cursor-ring {
+  position: fixed;
+  width: 32px;
+  height: 32px;
+  border: 1.5px solid var(--hell-red);
+  pointer-events: none;
+  z-index: 9998;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition:
+    width 200ms,
+    height 200ms,
+    opacity 200ms;
+}
+.cursor-trail {
+  position: fixed;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--ember);
+  box-shadow: 0 0 6px var(--ember);
+  pointer-events: none;
+  z-index: 9997;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+}
+
+/* Hero entrance animations */
+@keyframes hero-flame-burst {
+  0% {
+    transform: scale(0.4);
+    opacity: 0;
+    filter: blur(20px);
+  }
+  40% {
+    transform: scale(1.1);
+    opacity: 1;
+    filter: blur(0);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+@keyframes hero-slide-in {
+  from {
+    transform: translateX(-30px) skewX(-8deg);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0) skewX(0);
+    opacity: 1;
+  }
+}
+@keyframes fade-up {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+.anim-burst {
+  animation: hero-flame-burst 1.2s cubic-bezier(0.2, 0.9, 0.3, 1.1) both;
+}
+.anim-slide {
+  animation: hero-slide-in 0.7s ease-out 0.7s both;
+}
+.anim-fade-up {
+  animation: fade-up 0.6s ease-out both;
+}
+
+/* LIVE pulse */
+@keyframes live-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(0.85);
+  }
+}
+.live-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--hell-red);
+  border-radius: 50%;
+  animation: live-pulse 1.4s ease-in-out infinite;
+  box-shadow: 0 0 8px var(--hell-red);
+  display: inline-block;
+}
+
+/* Progress bar */
+.slot-bar {
+  height: 6px;
+  background: var(--ash-2);
+  position: relative;
+  overflow: hidden;
+}
+.slot-bar > div {
+  height: 100%;
+  background: linear-gradient(90deg, var(--hell-red), var(--ember));
+  transition: width 600ms cubic-bezier(0.2, 0.9, 0.3, 1);
+  position: relative;
+}
+.slot-bar > div::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
+  animation: shimmer 2s linear infinite;
+}
+@keyframes shimmer {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(200%);
+  }
+}
+
+/* Striped placeholder */
+.placeholder-stripe {
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--ash-1),
+    var(--ash-1) 8px,
+    var(--ash-2) 8px,
+    var(--ash-2) 16px
+  );
+}
+
+/* Scope reticle frame */
+.scope-frame {
+  position: relative;
+  padding: 8px;
+}
+.scope-frame::before,
+.scope-frame::after {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--hell-red);
+}
+.scope-frame::before {
+  top: 0;
+  left: 0;
+  border-right: none;
+  border-bottom: none;
+}
+.scope-frame::after {
+  bottom: 0;
+  right: 0;
+  border-left: none;
+  border-top: none;
+}
+
+/* Marquee horizontal scroll roster */
+.roster-scroll {
+  scrollbar-width: none;
+}
+.roster-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* Modal backdrop */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  animation: fade-up 0.25s ease-out;
+}
+
+/* Diagonal red wipe between sections */
+.section-wipe {
+  position: relative;
+}
+.section-wipe::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: var(--black);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 60%);
+  z-index: 1;
+}
+
+/* Number stat */
+.stat-number {
+  font-family: var(--font-jetbrains), monospace;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Loading bar */
+@keyframes load-fill {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+.load-fill {
+  animation: load-fill 2.2s ease-out forwards;
+}
+
+/* Hide scrollbar utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+/* Marquee row separators */
+.ticker-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 28px;
+  font-family: var(--font-jetbrains), monospace;
+  font-size: 12px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+.ticker-sep {
+  width: 6px;
+  height: 6px;
+  background: var(--bone);
+  transform: rotate(45deg);
+}
+
+/* Inputs */
+.field {
+  width: 100%;
+  background: var(--ash-3);
+  border: 1px solid var(--ash-2);
+  color: var(--bone);
+  padding: 12px 14px;
+  font-family: var(--font-jetbrains), monospace;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  transition: border-color 150ms;
+}
+.field:focus {
+  outline: none;
+  border-color: var(--hell-red);
+}
+.field-label {
+  display: block;
+  font-family: var(--font-jetbrains), monospace;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(245, 240, 232, 0.5);
+  margin-bottom: 6px;
+}
+.field-error {
+  font-family: var(--font-jetbrains), monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--hell-red);
+  margin-top: 4px;
+}
+
+/* Hot badge */
+.badge-hot {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--hell-red);
+  color: var(--bone);
+  font-family: var(--font-jetbrains), monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  padding: 4px 8px;
+  text-transform: uppercase;
+}
+
+/* Product hover flip */
+.flip-card {
+  perspective: 1000px;
+}
+.flip-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 500ms cubic-bezier(0.2, 0.9, 0.3, 1);
+  transform-style: preserve-3d;
+}
+.flip-card:hover .flip-inner,
+.flip-card:focus-within .flip-inner {
+  transform: rotateY(180deg);
+}
+.flip-front,
+.flip-back {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.flip-back {
+  transform: rotateY(180deg);
+}
+
+/* Reduced motion: kill the flashy stuff but preserve information */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .ember,
+  .cursor-trail,
+  .cursor-dot,
+  .cursor-ring {
+    display: none !important;
+  }
+  .ticker-track {
+    animation: none !important;
+  }
+  .card-bite:hover {
+    transform: none !important;
+  }
+  .flip-card:hover .flip-inner,
+  .flip-card:focus-within .flip-inner {
+    transform: none !important;
+  }
+}
+
+/* ==========================================================================
+   CMS Markdown — scoped prose styles for the generic [slug] page renderer.
+   ========================================================================== */
+.cms-prose {
+  color: rgba(245, 240, 232, 0.85);
+  font-size: 1rem;
+  line-height: 1.75;
+}
+.cms-prose > * + * {
+  margin-top: 1.25em;
+}
+.cms-prose h1,
+.cms-prose h2,
+.cms-prose h3,
+.cms-prose h4 {
+  font-family: var(--font-display, "Saira Condensed"), sans-serif;
+  font-style: italic;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  color: var(--bone);
+  line-height: 1.05;
+  margin-top: 2.4em;
+  margin-bottom: 0.6em;
+}
+.cms-prose h1 {
+  font-size: 2.75rem;
+  color: var(--hell-red);
+}
+.cms-prose h2 {
+  font-size: 2.1rem;
+  color: var(--hell-red);
+}
+.cms-prose h3 {
+  font-size: 1.5rem;
+  color: var(--bone);
+}
+.cms-prose h4 {
+  font-size: 1.15rem;
+  color: var(--ember);
+}
+.cms-prose p,
+.cms-prose li {
+  color: rgba(245, 240, 232, 0.82);
+}
+.cms-prose strong {
+  color: var(--bone);
+  font-weight: 700;
+}
+.cms-prose em {
+  color: var(--ember);
+  font-style: italic;
+}
+.cms-prose a {
+  color: var(--hell-red);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  transition: color 120ms ease;
+}
+.cms-prose a:hover {
+  color: var(--ember);
+}
+.cms-prose ul,
+.cms-prose ol {
+  padding-inline-start: 1.5rem;
+}
+.cms-prose ul {
+  list-style: none;
+}
+.cms-prose ul > li {
+  position: relative;
+  padding-inline-start: 1.25rem;
+}
+.cms-prose ul > li::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  top: 0.7em;
+  width: 0.5rem;
+  height: 1px;
+  background: var(--hell-red);
+}
+.cms-prose ol {
+  list-style: decimal;
+}
+.cms-prose ol > li::marker {
+  color: var(--hell-red);
+  font-family: var(--font-mono, "JetBrains Mono"), monospace;
+  font-size: 0.85em;
+}
+.cms-prose blockquote {
+  border-inline-start: 2px solid var(--hell-red);
+  padding-inline-start: 1rem;
+  color: rgba(245, 240, 232, 0.7);
+  font-style: italic;
+}
+.cms-prose code {
+  font-family: var(--font-mono, "JetBrains Mono"), monospace;
+  font-size: 0.85em;
+  padding: 0.15em 0.4em;
+  background: var(--ash-1);
+  color: var(--ember);
+  border: 1px solid rgba(230, 0, 19, 0.2);
+}
+.cms-prose pre {
+  background: var(--ash-3);
+  border: 1px solid rgba(230, 0, 19, 0.2);
+  padding: 1rem 1.25rem;
+  overflow-x: auto;
+  font-family: var(--font-mono, "JetBrains Mono"), monospace;
+  font-size: 0.85em;
+  color: rgba(245, 240, 232, 0.9);
+}
+.cms-prose pre code {
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: inherit;
+}
+.cms-prose hr {
+  border: 0;
+  border-top: 1px solid rgba(230, 0, 19, 0.25);
+  margin: 2.5em 0;
+}
+.cms-prose table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9em;
+}
+.cms-prose th,
+.cms-prose td {
+  border: 1px solid rgba(245, 240, 232, 0.1);
+  padding: 0.6em 0.8em;
+  text-align: start;
+}
+.cms-prose th {
+  background: var(--ash-1);
+  color: var(--hell-red);
+  font-family: var(--font-mono, "JetBrains Mono"), monospace;
+  font-size: 0.8em;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
