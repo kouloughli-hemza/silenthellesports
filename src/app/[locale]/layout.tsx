@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 import { fontVariables } from "@/lib/fonts";
 import { dirFor, isLocale, routing } from "@/lib/i18n/routing";
@@ -70,6 +71,7 @@ export default async function LocaleLayout({
           <CustomCursor />
           <main id="main">{children}</main>
         </NextIntlClientProvider>
+        <SpeedInsights />
       </body>
     </html>
   );
