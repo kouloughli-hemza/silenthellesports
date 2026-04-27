@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { CountUp, SectionHeading, SkullIcon } from "@/components/brand";
+import { TrophyRevealMount } from "@/components/scenes/TrophyRevealMount";
 import { getRecentTrophies, getTrophyStats } from "@/lib/data/trophies";
 import { pickTranslation, type Locale, type Trophy } from "@/types/domain";
 
@@ -38,6 +39,12 @@ export async function TrophyCase({ locale }: TrophyCaseProps) {
       className="grain relative py-24 md:py-32"
       style={{ background: "var(--ash-3)" }}
     >
+      <TrophyRevealMount
+        winnerLine={t("revealWinner")}
+        chickenLine={t("revealChicken")}
+        subtitle={t("revealSubtitle")}
+        skipLabel={locale === "ar" ? "تخطي" : "SKIP"}
+      />
       <div className="mx-auto max-w-[1400px] px-6 md:px-10">
         <div className="mb-12 grid items-end gap-12 md:grid-cols-[1fr_2fr]">
           <SectionHeading

@@ -1,14 +1,16 @@
 import { useTranslations } from "next-intl";
 import { SkullIcon } from "@/components/brand";
+import { KnockedDownStamp } from "@/components/scenes/KnockedDownStamp";
 import { Link } from "@/lib/i18n/routing";
 
 export default function NotFound() {
   const t = useTranslations("notFound");
   return (
     <div
-      className="grain relative flex min-h-screen flex-col items-center justify-center px-6 text-center"
+      className="grain relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-6 text-center"
       style={{ background: "var(--black)" }}
     >
+      <KnockedDownStamp label={t("knockedDown")} />
       <SkullIcon size={56} title="Silent Hell" />
       <p
         className="mt-6 font-mono text-[11px] tracking-[0.3em] uppercase"

@@ -3,6 +3,7 @@ import { setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { TopBar } from "@/components/layout/top-bar";
 import { FooterBlock } from "@/components/layout/footer-block";
+import { SpectatorCamTransition } from "@/components/scenes/SpectatorCamTransition";
 import { isLocale } from "@/lib/i18n/routing";
 import { getSiteConfig } from "@/lib/site-config";
 import { getSessionUser } from "@/lib/auth/session";
@@ -32,6 +33,7 @@ export default async function PublicLayout({
         signedIn={Boolean(sessionUser)}
         cartCount={cartCount}
       />
+      <SpectatorCamTransition />
       {children}
       <FooterBlock locale={locale} />
     </>

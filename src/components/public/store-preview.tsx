@@ -5,6 +5,7 @@ import { getActiveProducts } from "@/lib/data/products";
 import { getSiteConfig } from "@/lib/site-config";
 import { ProductCard } from "@/components/public/product-card";
 import { FeaturedDrop } from "@/components/public/featured-drop";
+import { StoreAirdropCrate } from "@/components/scenes/StoreAirdropCrate";
 import type { Locale } from "@/types/domain";
 
 interface StorePreviewProps {
@@ -31,6 +32,7 @@ export async function StorePreview({ locale }: StorePreviewProps) {
       className="relative py-24 md:py-32"
       style={{ background: "var(--ash-3)" }}
     >
+      <StoreAirdropCrate badgeLabel={t("airdropBadge")} newDropLabel={t("newDrop")} />
       <div className="mx-auto max-w-[1400px] px-6 md:px-10">
         <div className="mb-12 grid items-end gap-8 md:grid-cols-2">
           <SectionHeading

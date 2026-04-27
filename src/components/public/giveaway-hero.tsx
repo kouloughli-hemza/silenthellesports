@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { EmberField, PlaceholderImage } from "@/components/brand";
+import { GiveawayBurst } from "@/components/scenes/GiveawayBurst";
 import { GiveawayCountdown } from "@/components/public/giveaway-countdown";
 import { GiveawayEntryForm } from "@/components/public/giveaway-entry-form";
 import { getSessionUser } from "@/lib/auth/session";
@@ -75,6 +76,7 @@ export async function GiveawayHero({ locale }: GiveawayHeroProps) {
       style={{ background: "var(--black)" }}
     >
       <EmberField count={50} opacity={0.6} />
+      <GiveawayBurst />
       <div
         className="absolute inset-0"
         style={{

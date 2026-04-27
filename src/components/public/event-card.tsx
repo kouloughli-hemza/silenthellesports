@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/routing";
+import { EventBlueZone } from "@/components/scenes/EventBlueZone";
 import {
   formatDateShort,
   formatTime,
@@ -49,6 +50,9 @@ export async function EventCard({
       className="card-bite notch group relative overflow-hidden"
       style={{ background: "var(--ash-1)" }}
     >
+      {variant === "upcoming" && capacity > 0 ? (
+        <EventBlueZone pct={pct} isFull={isFull} hot={hot} closedLabel={t("statusClosed")} />
+      ) : null}
       <div className="p-6">
         <div className="mb-5 flex items-start justify-between gap-3">
           <div className="min-w-0">

@@ -64,6 +64,13 @@
       "headshot": "Headshot rate"
     }
   },
+  "intro": {
+    "skip": "SKIP",
+    "scroll": "↓ SCROLL TO CONTINUE",
+    "live": "LIVE",
+    "sector": "SECTOR 01 // INSERTION",
+    "context": "PUBG MOBILE // RANKED"
+  },
   "roster": {
     "label": "THE SQUAD / {count} ACTIVE",
     "t1": "Shadow",
@@ -107,7 +114,10 @@
     "trophies": "Trophies lifted",
     "wins": "Match wins",
     "firstPlace": "First-place finishes",
-    "empty": "No trophies yet — but watch this space."
+    "empty": "No trophies yet — but watch this space.",
+    "revealWinner": "WINNER WINNER",
+    "revealChicken": "CHICKEN DINNER",
+    "revealSubtitle": "// SILENT HELL ESPORTS //"
   },
   "socials": {
     "label": "UPLINK / LIVE SOCIALS",
@@ -230,6 +240,8 @@
     "t1": "Wear the squad.",
     "t2": "Earn the silence.",
     "browse": "Browse full armory",
+    "airdropBadge": "// AIRDROP //",
+    "newDrop": "NEW DROP",
     "featured": "FEATURED · INFERNO COLLECTION",
     "hrs": "HRS",
     "min": "MIN",
@@ -359,7 +371,8 @@
     "squad": "SQUAD",
     "support": "SUPPORT",
     "sponsors": "// SPONSORS",
-    "copy": "© {year} Silent Hell Esports · All silence reserved"
+    "copy": "© {year} Silent Hell Esports · All silence reserved",
+    "finalCircle": "FINAL CIRCLE · STABLE"
   },
   "auth": {
     "login": {
@@ -620,6 +633,7 @@
   "notFound": {
     "title": "OFF THE MAP",
     "subtitle": "The page you're looking for isn't on the grid.",
-    "goHome": "Back to base"
+    "goHome": "Back to base",
+    "knockedDown": "KNOCKED DOWN"
   }
 }

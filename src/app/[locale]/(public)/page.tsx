@@ -1,4 +1,4 @@
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { Hero } from "@/components/public/hero";
 import { RosterStrip } from "@/components/public/roster-strip";
@@ -7,6 +7,7 @@ import { SocialsBlock } from "@/components/public/socials-block";
 import { EventsPreview } from "@/components/public/events-preview";
 import { StorePreview } from "@/components/public/store-preview";
 import { GiveawayHero } from "@/components/public/giveaway-hero";
+import { HeroOverlayMount } from "@/components/scenes/HeroOverlayMount";
 import { isLocale } from "@/lib/i18n/routing";
 
 export default async function HomePage({
@@ -18,8 +19,17 @@ export default async function HomePage({
   if (!isLocale(locale)) notFound();
   setRequestLocale(locale);
 
+  const intro = await getTranslations({ locale, namespace: "intro" });
+
   return (
     <>
+      <HeroOverlayMount
+        scrollLabel={intro("scroll")}
+        liveLabel={intro("live")}
+        sectorLabel={intro("sector")}
+        contextLabel={intro("context")}
+        skipLabel={intro("skip")}
+      />
       <Hero locale={locale} />
       <RosterStrip locale={locale} />
       <TrophyCase locale={locale} />

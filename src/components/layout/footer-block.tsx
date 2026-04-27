@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/routing";
 import { LangSwitcher } from "./lang-switcher";
 import { DiscordIcon } from "./discord-icon";
+import { FooterFinalCircle } from "@/components/scenes/FooterFinalCircle";
 import { getSiteConfig } from "@/lib/site-config";
 import type { Locale } from "@/types/domain";
 
@@ -131,6 +132,7 @@ export async function FooterBlock({ locale }: FooterBlockProps) {
         >
           <div>{t("copy", { year: String(year) })}</div>
           <div className="flex items-center gap-4">
+            <FooterFinalCircle label={t("finalCircle")} />
             <LangSwitcher />
           </div>
         </div>

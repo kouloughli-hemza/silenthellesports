@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { PlaceholderImage, SectionHeading } from "@/components/brand";
+import { RosterParachuteDrop } from "@/components/scenes/RosterParachuteDrop";
 import { Link } from "@/lib/i18n/routing";
 import { getActivePlayers } from "@/lib/data/players";
 import { flagEmoji } from "@/lib/utils/format";
@@ -20,6 +21,7 @@ export async function RosterStrip({ locale }: RosterStripProps) {
       className="relative py-24 md:py-32"
       style={{ background: "var(--black)" }}
     >
+      <RosterParachuteDrop />
       <div className="mx-auto max-w-[1400px] px-6 md:px-10">
         <div className="mb-10 flex flex-wrap items-end justify-between gap-6">
           <SectionHeading
@@ -110,8 +112,9 @@ function PlayerCard({ player, index, locale }: PlayerCardProps) {
     <Link
       href={`/roster/${encodeURIComponent(player.ign)}`}
       locale={locale}
+      data-roster-card
       className="card-bite notch group flex-shrink-0 focus-visible:outline-none"
-      style={{ width: 280, background: "var(--ash-1)", padding: 0, display: "block" }}
+      style={{ width: 280, background: "var(--ash-1)", padding: 0, display: "block", position: "relative" }}
       aria-label={player.ign}
     >
       <div className="relative">

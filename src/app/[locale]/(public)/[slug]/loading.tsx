@@ -1,3 +1,5 @@
+import { RespawnLoader } from "@/components/scenes/RespawnLoader";
+
 export default function CmsPageLoading() {
   return (
     <div
@@ -14,16 +16,7 @@ export default function CmsPageLoading() {
             "radial-gradient(ellipse 60% 40% at 30% 60%, rgba(230,0,19,0.14), transparent 70%)",
         }}
       />
-      <div className="relative mx-auto max-w-3xl px-6 pt-28 pb-12 md:px-10 md:pt-36">
-        <div
-          className="skeleton-pulse h-3 w-40"
-          style={{ background: "rgba(230,0,19,0.4)" }}
-        />
-        <div
-          className="skeleton-pulse mt-5 h-12 w-3/4 md:h-16"
-          style={{ background: "var(--ash-1)" }}
-        />
-      </div>
+      <RespawnLoader />
 
       <div
         className="relative mx-auto mt-12 max-w-3xl space-y-4 px-6 md:px-10"
