@@ -33,10 +33,10 @@ export default async function HomePage({
       <Hero locale={locale} />
       <RosterStrip locale={locale} />
       <TrophyCase locale={locale} />
-      <SocialsBlock locale={locale} />
-      <EventsPreview locale={locale} />
       <StorePreview locale={locale} />
+      <EventsPreview locale={locale} />
       <GiveawayHero locale={locale} />
+      <SocialsBlock locale={locale} />
     </>
   );
 }
