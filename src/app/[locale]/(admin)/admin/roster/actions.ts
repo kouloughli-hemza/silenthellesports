@@ -42,6 +42,13 @@ const Schema = z.object({
   photo_url: z.string().trim().url().nullable(),
   bio: Translated,
   signature_loadout: z.string().trim().max(120).nullable(),
+  highlight_url: z
+    .string()
+    .trim()
+    .max(300)
+    .url({ message: "Must be a full URL" })
+    .nullable()
+    .or(z.literal("").transform(() => null)),
   stats: StatsSchema,
   socials: SocialsSchema,
   display_order: z.number().int().min(0).max(9999),

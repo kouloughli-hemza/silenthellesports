@@ -30,6 +30,7 @@ export default async function EditPlayerPage({
     photo_url: player.photo_url,
     bio: { en: bio.en ?? "", ar: bio.ar ?? "" },
     signature_loadout: player.signature_loadout,
+    highlight_url: player.highlight_url,
     stats,
     socials,
     display_order: player.display_order,

@@ -75,6 +75,7 @@ export type Database = {
           photo_url: string | null;
           bio: Json;
           signature_loadout: string | null;
+          highlight_url: string | null;
           stats: Json;
           socials: Json;
           display_order: number;
@@ -103,6 +104,7 @@ export type Database = {
           photo_url?: string | null;
           bio?: Json;
           signature_loadout?: string | null;
+          highlight_url?: string | null;
           stats?: Json;
           socials?: Json;
           display_order?: number;
@@ -131,6 +133,7 @@ export type Database = {
           photo_url?: string | null;
           bio?: Json;
           signature_loadout?: string | null;
+          highlight_url?: string | null;
           stats?: Json;
           socials?: Json;
           display_order?: number;
@@ -189,6 +192,7 @@ export type Database = {
           description: Json;
           mode: "Solo" | "Duo" | "Squad";
           map: string | null;
+          maps: Json;
           prize_pool: number;
           prize_currency: string;
           entry_fee: number;
@@ -209,6 +213,7 @@ export type Database = {
           description?: Json;
           mode: "Solo" | "Duo" | "Squad";
           map?: string | null;
+          maps?: Json;
           prize_pool?: number;
           prize_currency?: string;
           entry_fee?: number;
@@ -229,6 +234,7 @@ export type Database = {
           description?: Json;
           mode?: "Solo" | "Duo" | "Squad";
           map?: string | null;
+          maps?: Json;
           prize_pool?: number;
           prize_currency?: string;
           entry_fee?: number;

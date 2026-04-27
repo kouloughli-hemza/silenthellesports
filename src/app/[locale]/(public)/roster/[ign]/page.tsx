@@ -11,6 +11,7 @@ import {
   getStaff,
 } from "@/lib/data/players";
 import { getActiveProducts } from "@/lib/data/products";
+import { highlightEmbedSrc, parseHighlightUrl } from "@/lib/players/highlight";
 import { flagEmoji } from "@/lib/utils/format";
 import {
   formatPrice,
@@ -105,6 +106,7 @@ export default async function PlayerDetailPage({
   const bio = pickTranslation(player.bio, locale);
   const isAr = locale === "ar";
   const flag = flagEmoji(player.country_code);
+  const highlight = parseHighlightUrl(player.highlight_url);
 
   return (
     <article style={{ background: "var(--black)" }}>
@@ -224,6 +226,40 @@ export default async function PlayerDetailPage({
             >
               {player.signature_loadout}
             </p>
+          </div>
+        </section>
+      ) : null}
+
+      {/* Highlight reel */}
+      {highlight ? (
+        <section className="mx-auto max-w-[1400px] px-6 py-12 md:px-10 md:py-16">
+          <div className="mb-6">
+            <span className="section-label">{t("highlight")}</span>
+          </div>
+          <div
+            className="relative w-full overflow-hidden mx-auto"
+            style={
+              highlight.platform === "tiktok"
+                ? { maxWidth: 360, aspectRatio: "9 / 16", border: "1px solid rgba(230,0,19,0.25)" }
+                : { aspectRatio: "16 / 9", border: "1px solid rgba(230,0,19,0.25)" }
+            }
+          >
+            <iframe
+              src={highlightEmbedSrc(highlight)}
+              title={t("highlightAria", { ign: player.ign })}
+              loading="lazy"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+              referrerPolicy="strict-origin-when-cross-origin"
+              style={{
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
+                border: "none",
+                background: "var(--ash-3)",
+              }}
+            />
           </div>
         </section>
       ) : null}

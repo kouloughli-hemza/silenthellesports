@@ -55,6 +55,21 @@ export function EventForm({ mode, id, locale, initial }: EventFormProps) {
   function removeRule(idx: number) {
     setState((s) => ({ ...s, rules: s.rules.filter((_, i) => i !== idx) }));
   }
+  function setMap(idx: number, value: string) {
+    setState((s) => {
+      const next = [...s.maps];
+      next[idx] = value;
+      return { ...s, maps: next };
+    });
+  }
+  function addMap() {
+    setState((s) =>
+      s.maps.length >= 5 ? s : { ...s, maps: [...s.maps, ""] },
+    );
+  }
+  function removeMap(idx: number) {
+    setState((s) => ({ ...s, maps: s.maps.filter((_, i) => i !== idx) }));
+  }
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -167,7 +182,7 @@ export function EventForm({ mode, id, locale, initial }: EventFormProps) {
       </Section>
 
       <Section title="MATCH">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <Field label="Mode *">
             <select
               className="field"
@@ -181,14 +196,6 @@ export function EventForm({ mode, id, locale, initial }: EventFormProps) {
               ))}
             </select>
           </Field>
-          <Field label="Map">
-            <input
-              className="field"
-              value={state.map ?? ""}
-              onChange={(e) => set("map", e.target.value || null)}
-              placeholder="Erangel / Miramar / TBD"
-            />
-          </Field>
           <Field label="Capacity *">
             <input
               type="number"
@@ -198,6 +205,53 @@ export function EventForm({ mode, id, locale, initial }: EventFormProps) {
               onChange={(e) => set("capacity", Number(e.target.value) || 1)}
             />
           </Field>
+        </div>
+        <div className="mt-4 space-y-2">
+          <div className="field-label">Maps (up to 5)</div>
+          {state.maps.length === 0 ? (
+            <p className="font-mono text-xs" style={{ color: "rgba(245,240,232,0.6)" }}>
+              No maps yet.
+            </p>
+          ) : null}
+          {state.maps.map((m, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <span
+                className="font-mono text-[10px] tracking-[0.25em] uppercase shrink-0"
+                style={{ color: "var(--hell-red)", minWidth: "1.5rem" }}
+              >
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              <input
+                className="field flex-1"
+                value={m}
+                onChange={(e) => setMap(i, e.target.value)}
+                placeholder="Erangel / Miramar / Sanhok / Vikendi / Livik"
+              />
+              <button
+                type="button"
+                onClick={() => removeMap(i)}
+                className="font-mono text-[10px] tracking-[0.2em] uppercase"
+                style={{
+                  color: "var(--hell-red)",
+                  border: "1px solid var(--hell-red)",
+                  padding: "8px 12px",
+                }}
+                aria-label={`Remove map ${i + 1}`}
+              >
+                ×
+              </button>
+            </div>
+          ))}
+          {state.maps.length < 5 ? (
+            <button
+              type="button"
+              onClick={addMap}
+              className="btn-ghost"
+              style={{ padding: "8px 16px", fontSize: 11 }}
+            >
+              + ADD MAP
+            </button>
+          ) : null}
         </div>
       </Section>
 

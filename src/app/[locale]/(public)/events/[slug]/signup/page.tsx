@@ -6,7 +6,7 @@ import { Link, isLocale } from "@/lib/i18n/routing";
 import { getEventBySlug, getEventSignupCount } from "@/lib/data/events";
 import { getSessionUser } from "@/lib/auth/session";
 import { formatDateLong, formatTime } from "@/lib/utils/format";
-import { formatPrice, pickTranslation } from "@/types/domain";
+import { formatPrice, getEventMaps, pickTranslation } from "@/types/domain";
 
 import { SignupForm } from "./signup-form";
 
@@ -77,11 +77,12 @@ export default async function EventSignupPage({ params }: SignupPageProps) {
   const startsTime = formatTime(event.start_at, locale);
 
   // Has the current user already signed up?
+  // Uses the admin client to bypass RLS — we scope strictly by user_id and event_id,
+  // and we only ran getSessionUser() server-side, so there's no trust boundary to cross.
   let alreadySignedCode: string | null = null;
   if (sessionUser) {
-    // We use the public client via the data lib? There is no helper — inline a quick lookup using the public client.
-    const { createPublicClient } = await import("@/lib/supabase/public");
-    const supabase = createPublicClient();
+    const { createAdminClient } = await import("@/lib/supabase/admin");
+    const supabase = createAdminClient();
     const { data: existing } = await supabase
       .from("event_signups")
       .select("confirmation_code")
@@ -138,7 +139,10 @@ export default async function EventSignupPage({ params }: SignupPageProps) {
             style={{ color: "rgba(245,240,232,0.6)" }}
           >
             {startsLong} · {startsTime} · {event.mode}
-            {event.map ? ` · ${event.map}` : ""} · {feeLabel}
+            {(() => {
+              const ms = getEventMaps(event);
+              return ms.length > 0 ? ` · ${ms.join(" · ")}` : "";
+            })()} · {feeLabel}
           </div>
 
           {/* slot bar */}
@@ -220,8 +224,11 @@ export default async function EventSignupPage({ params }: SignupPageProps) {
                 string,
                 string,
               ],
-              stepProgress: (current: number, total: number) =>
-                t("stepProgress", { current, total }),
+              stepProgress: [
+                t("stepProgress", { current: 1, total: 3 }),
+                t("stepProgress", { current: 2, total: 3 }),
+                t("stepProgress", { current: 3, total: 3 }),
+              ] as [string, string, string],
               ign: t("ign"),
               ignPlaceholder: t("ignPlaceholder"),
               uid: t("uid"),
@@ -234,8 +241,31 @@ export default async function EventSignupPage({ params }: SignupPageProps) {
               phoneHint: t("phoneHint"),
               emailOptional: t("emailOptional"),
               squad: t("squad"),
-              squadMember: (n: number) => t("squadMember", { n }),
-              squadMemberUid: (n: number) => t("squadMemberUid", { n }),
+              squadMember: [
+                t("squadMember", { n: 2 }),
+                t("squadMember", { n: 3 }),
+                t("squadMember", { n: 4 }),
+              ] as [string, string, string],
+              squadMemberUid: [
+                t("squadMemberUid", { n: 2 }),
+                t("squadMemberUid", { n: 3 }),
+                t("squadMemberUid", { n: 4 }),
+              ] as [string, string, string],
+              player: [
+                t("player", { n: 1 }),
+                t("player", { n: 2 }),
+                t("player", { n: 3 }),
+                t("player", { n: 4 }),
+              ] as [string, string, string, string],
+              playerUid: [
+                t("playerUid", { n: 1 }),
+                t("playerUid", { n: 2 }),
+                t("playerUid", { n: 3 }),
+                t("playerUid", { n: 4 }),
+              ] as [string, string, string, string],
+              substitute: t("substitute"),
+              substituteUid: t("substituteUid"),
+              substituteHint: t("substituteHint"),
               abort: t("abort"),
               back: t("back"),
               cont: t("continue"),

@@ -1,12 +1,14 @@
 "use client";
 
-// Mounts TrophyWinnerReveal every time the trophy section enters the viewport.
-// Uses the parent <section> as the IO target (instead of a 1x1 sentinel) so
-// the trigger is reliable even after layout/resize shenanigans.
+// Mounts TrophyWinnerReveal the first time the trophy section enters the
+// viewport for a given browser. localStorage gates it so returning visitors
+// don't get the chicken-dinner stamp on every visit.
 
 import { useEffect, useRef, useState } from "react";
 import { TrophyWinnerReveal } from "./TrophyWinnerReveal";
 import { useReducedMotion } from "@/lib/hooks/useReducedMotion";
+
+const STORAGE_KEY = "sh:trophy-reveal-seen";
 
 interface TrophyRevealMountProps {
   winnerLine: string;
@@ -22,6 +24,12 @@ export function TrophyRevealMount(props: TrophyRevealMountProps) {
 
   useEffect(() => {
     if (reduced) return;
+    try {
+      if (localStorage.getItem(STORAGE_KEY) === "1") return;
+    } catch {
+      // storage blocked — treat as already-seen so we don't loop on every visit
+      return;
+    }
     const trigger = triggerRef.current;
     if (!trigger) return;
     // Observe the parent section so any portion entering the viewport fires.
@@ -30,6 +38,11 @@ export function TrophyRevealMount(props: TrophyRevealMountProps) {
       (entries) => {
         for (const entry of entries) {
           if (entry.isIntersecting) {
+            try {
+              localStorage.setItem(STORAGE_KEY, "1");
+            } catch {
+              /* storage blocked — fall through, the IO disconnect still prevents re-fire this page */
+            }
             setOpen(true);
             io.disconnect();
             break;

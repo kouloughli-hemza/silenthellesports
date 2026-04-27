@@ -12,6 +12,7 @@ const EMPTY: PlayerInput = {
   photo_url: null,
   bio: { en: "", ar: "" },
   signature_loadout: null,
+  highlight_url: null,
   stats: {},
   socials: {},
   display_order: 0,

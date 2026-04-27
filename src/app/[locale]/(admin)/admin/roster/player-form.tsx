@@ -109,6 +109,15 @@ export function PlayerForm({ mode, id, locale, initial }: PlayerFormProps) {
               placeholder="M416 + Kar98k"
             />
           </Field>
+          <Field label="Highlight URL (YouTube or TikTok)">
+            <input
+              className="field"
+              type="url"
+              value={state.highlight_url ?? ""}
+              onChange={(e) => set("highlight_url", e.target.value || null)}
+              placeholder="https://www.youtube.com/watch?v=… or https://www.tiktok.com/@user/video/…"
+            />
+          </Field>
         </div>
       </Section>
 

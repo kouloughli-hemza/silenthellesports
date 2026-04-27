@@ -88,6 +88,19 @@ export type GiveawayEntry = Row<"giveaway_entries">;
 export type Page = Row<"pages">;
 export type Profile = Row<"profiles">;
 
+// Returns the event's map list (new `maps jsonb` array) with a fallback to the
+// legacy single-map column for older rows that haven't been backfilled.
+export function getEventMaps(event: Event): string[] {
+  const raw = (event as { maps?: unknown }).maps;
+  if (Array.isArray(raw)) {
+    return (raw as unknown[])
+      .map((m) => (typeof m === "string" ? m.trim() : ""))
+      .filter((s) => s.length > 0);
+  }
+  const single = (event.map ?? "").trim();
+  return single.length > 0 ? [single] : [];
+}
+
 // ----- Algerian phone validation -----
 export const ALGERIAN_PHONE_RE = /^0[567]\d{8}$/;
 export const isAlgerianPhone = (s: string): boolean => ALGERIAN_PHONE_RE.test(s);

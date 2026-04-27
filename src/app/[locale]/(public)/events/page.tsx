@@ -11,7 +11,9 @@ import {
   getEventSignupCount,
   getPastEvents,
   getUpcomingEvents,
+  getUserActiveSignupEventIds,
 } from "@/lib/data/events";
+import { getSessionUser } from "@/lib/auth/session";
 import type { Event } from "@/types/domain";
 
 type Tab = "upcoming" | "past";
@@ -73,6 +75,14 @@ export default async function EventsPage({
   const signupCounts = await Promise.all(
     events.map((ev) => getEventSignupCount(ev.id)),
   );
+
+  const sessionUser = tab === "upcoming" ? await getSessionUser() : null;
+  const signedEventIds = sessionUser
+    ? await getUserActiveSignupEventIds(
+        sessionUser.id,
+        events.map((ev) => ev.id),
+      )
+    : new Set<string>();
 
   const tabs: { key: Tab; label: string; href: string }[] = [
     { key: "upcoming", label: t("tabs.upcoming"), href: "/events" },
@@ -141,6 +151,7 @@ export default async function EventsPage({
                 signupCount={signupCounts[idx] ?? 0}
                 locale={locale}
                 variant={tab}
+                alreadySigned={signedEventIds.has(event.id)}
               />
             ))}
           </div>

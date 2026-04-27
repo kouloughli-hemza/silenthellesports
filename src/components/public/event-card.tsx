@@ -6,13 +6,20 @@ import {
   formatTime,
   formatWeekday,
 } from "@/lib/utils/format";
-import { formatPrice, pickTranslation, type Event, type Locale } from "@/types/domain";
+import {
+  formatPrice,
+  getEventMaps,
+  pickTranslation,
+  type Event,
+  type Locale,
+} from "@/types/domain";
 
 interface EventCardProps {
   event: Event;
   signupCount: number;
   locale: Locale;
   variant?: "upcoming" | "past";
+  alreadySigned?: boolean;
 }
 
 export async function EventCard({
@@ -20,6 +27,7 @@ export async function EventCard({
   signupCount,
   locale,
   variant = "upcoming",
+  alreadySigned = false,
 }: EventCardProps) {
   const t = await getTranslations({ locale, namespace: "events" });
   const isAr = locale === "ar";
@@ -43,7 +51,20 @@ export async function EventCard({
       ? formatPrice(event.prize_pool, locale, event.prize_currency)
       : t("tbd");
 
-  const ctaLabel = variant === "past" ? t("viewResult") : t("slotIn");
+  const maps = getEventMaps(event);
+  const mapLabel =
+    maps.length === 0
+      ? t("tbd")
+      : maps.length === 1
+        ? maps[0]
+        : `${maps[0]} +${maps.length - 1}`;
+
+  const ctaLabel =
+    variant === "past"
+      ? t("viewResult")
+      : alreadySigned
+        ? t("alreadyIn")
+        : t("slotIn");
 
   return (
     <article
@@ -84,7 +105,19 @@ export async function EventCard({
             </div>
           </div>
 
-          {hot && variant === "upcoming" ? (
+          {alreadySigned && variant === "upcoming" ? (
+            <span
+              className="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1 font-mono text-[10px] tracking-[0.25em] uppercase"
+              style={{
+                background: "var(--ash-3)",
+                color: "var(--hell-red)",
+                border: "1px solid var(--hell-red)",
+              }}
+            >
+              <span className="live-dot" />
+              {t("alreadyIn")}
+            </span>
+          ) : hot && variant === "upcoming" ? (
             <span className="badge-hot shrink-0">
               <span className="live-dot" style={{ background: "var(--bone)" }} />
               {t("hot")}
@@ -98,7 +131,7 @@ export async function EventCard({
         >
           {[
             { l: t("mode"), v: event.mode },
-            { l: t("map"), v: event.map ?? t("tbd") },
+            { l: t("map"), v: mapLabel },
             { l: t("entry"), v: feeLabel },
           ].map((b) => (
             <div
@@ -159,10 +192,16 @@ export async function EventCard({
 
         <Link
           href={`/events/${event.slug}`}
-          className="btn-hell w-full justify-center"
+          className={
+            alreadySigned && variant === "upcoming"
+              ? "btn-ghost w-full justify-center"
+              : "btn-hell w-full justify-center"
+          }
           aria-label={`${ctaLabel} — ${title}`}
         >
-          {variant === "upcoming" && isFull ? t("statusFull") : ctaLabel}
+          {variant === "upcoming" && !alreadySigned && isFull
+            ? t("statusFull")
+            : ctaLabel}
           <span aria-hidden>{isAr ? "↖" : "↗"}</span>
         </Link>
       </div>

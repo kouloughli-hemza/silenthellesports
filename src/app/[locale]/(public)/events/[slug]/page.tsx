@@ -16,11 +16,12 @@ import {
   getEventSignupCount,
   getPastEvents,
   getUpcomingEvents,
+  getUserSignupForEvent,
 } from "@/lib/data/events";
 import { getSessionUser } from "@/lib/auth/session";
-import { createPublicClient } from "@/lib/supabase/public";
 import {
   formatPrice,
+  getEventMaps,
   pickTranslation,
   type Event,
   type Locale,
@@ -147,7 +148,20 @@ export default async function EventDetailPage({ params }: EventDetailProps) {
 
   const title = pickTranslation(event.title, locale);
   const description = pickTranslation(event.description, locale);
-  const rules = pickTranslation(event.rules, locale);
+  // Rules are stored as an array of bilingual items (`{en, ar}`) by the admin form.
+  // Older events (default value) may have a single bilingual object — handle both.
+  const rules: string[] = Array.isArray(event.rules)
+    ? (event.rules as Array<{ en?: string; ar?: string }>)
+        .map((r) =>
+          locale === "ar"
+            ? (r?.ar ?? "").trim() || (r?.en ?? "").trim()
+            : (r?.en ?? "").trim() || (r?.ar ?? "").trim(),
+        )
+        .filter((s) => s.length > 0)
+    : (() => {
+        const single = pickTranslation(event.rules, locale);
+        return single.length > 0 ? [single] : [];
+      })();
   const tag = (event.tag ?? "").trim().toUpperCase();
 
   const capacity = event.capacity || 0;
@@ -169,16 +183,11 @@ export default async function EventDetailPage({ params }: EventDetailProps) {
     (event.status === "upcoming" || event.status === "open");
 
   // Has the current user already signed up for this event?
+  // RLS hides event_signups from anon — fetch via the admin-scoped helper.
   const sessionUser = await getSessionUser();
   let alreadySignedCode: string | null = null;
   if (sessionUser) {
-    const supabase = createPublicClient();
-    const { data: existing } = await supabase
-      .from("event_signups")
-      .select("confirmation_code")
-      .eq("event_id", event.id)
-      .eq("user_id", sessionUser.id)
-      .maybeSingle();
+    const existing = await getUserSignupForEvent(sessionUser.id, event.id);
     if (existing?.confirmation_code) {
       alreadySignedCode = existing.confirmation_code;
     }
@@ -204,6 +213,8 @@ export default async function EventDetailPage({ params }: EventDetailProps) {
       ? formatPrice(event.prize_pool, locale, event.prize_currency)
       : t("tbd");
 
+  const eventMaps = getEventMaps(event);
+  const mapsLabel = eventMaps.length === 0 ? t("tbd") : eventMaps.join(" · ");
   const startsLong = formatDateLong(event.start_at, locale);
   const startsTime = formatTime(event.start_at, locale);
   const startsWeekday = formatWeekday(event.start_at, locale);
@@ -315,7 +326,12 @@ export default async function EventDetailPage({ params }: EventDetailProps) {
                 sub: startsLong,
               },
               { l: t("mode"), v: event.mode, sub: null },
-              { l: t("map"), v: event.map ?? t("tbd"), sub: null },
+              {
+                l: eventMaps.length > 1 ? t("maps") : t("map"),
+                v: mapsLabel,
+                sub:
+                  eventMaps.length > 1 ? `${eventMaps.length} maps` : null,
+              },
               {
                 l: t("registrationCloses"),
                 v: closesRel,
@@ -368,15 +384,25 @@ export default async function EventDetailPage({ params }: EventDetailProps) {
           {rules.length > 0 ? (
             <section>
               <SectionLabel label={t("rules")} />
-              <div
-                className="notch mt-4 p-6 text-sm leading-relaxed whitespace-pre-line md:p-8 md:text-base"
+              <ol
+                className="notch mt-4 space-y-3 p-6 text-sm leading-relaxed md:p-8 md:text-base"
                 style={{
                   background: "var(--ash-1)",
-                  color: "rgba(245,240,232,0.78)",
+                  color: "rgba(245,240,232,0.85)",
                 }}
               >
-                {rules}
-              </div>
+                {rules.map((rule, i) => (
+                  <li key={i} className="flex gap-3">
+                    <span
+                      className="font-mono text-[11px] tracking-[0.2em] shrink-0"
+                      style={{ color: "var(--hell-red)", minWidth: "1.5rem" }}
+                    >
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <span className="whitespace-pre-line">{rule}</span>
+                  </li>
+                ))}
+              </ol>
             </section>
           ) : null}
         </div>

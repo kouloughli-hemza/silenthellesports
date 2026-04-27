@@ -32,7 +32,9 @@ const SignupSchemaBase = z.object({
     .trim()
     .regex(ALGERIAN_PHONE_RE),
   email: z.union([z.literal(""), z.string().email().max(254)]).optional(),
-  squad_members: z.array(SquadMemberSchema).max(3).default([]),
+  // Players + optional substitute. Per mode: Solo=1, Duo=2, Squad=4 mandatory,
+  // plus an optional 5th. Hard cap at 5 to defend against client tampering.
+  squad_members: z.array(SquadMemberSchema).max(5).default([]),
 });
 
 export type SignupInput = z.infer<typeof SignupSchemaBase>;
@@ -98,8 +100,10 @@ export async function submitSignupAction(
   // ---- 2. Validate payload ----
   const payload = readFormPayload(formData);
 
-  const expectedSquadCount =
-    event.mode === "Squad" ? 3 : event.mode === "Duo" ? 1 : 0;
+  // Manager is not a player — full team count = mandatory players + optional sub.
+  const mandatoryPlayers =
+    event.mode === "Squad" ? 4 : event.mode === "Duo" ? 2 : 1;
+  const maxPlayers = mandatoryPlayers + 1;
 
   const parsed = SignupSchemaBase.safeParse(payload);
   if (!parsed.success) {
@@ -114,7 +118,8 @@ export async function submitSignupAction(
     return fail("error");
   }
 
-  if (parsed.data.squad_members.length !== expectedSquadCount) {
+  const memberCount = parsed.data.squad_members.length;
+  if (memberCount < mandatoryPlayers || memberCount > maxPlayers) {
     return fail("errorSquad");
   }
 

@@ -14,6 +14,7 @@ const EMPTY: EventInput = {
   description: { en: "", ar: "" },
   mode: "Squad",
   map: null,
+  maps: [],
   prize_pool: 0,
   prize_currency: "DZD",
   entry_fee: 0,

@@ -20,7 +20,7 @@ interface SignupFormProps {
   defaultEmail?: string;
   copy: {
     steps: [string, string, string];
-    stepProgress: (current: number, total: number) => string;
+    stepProgress: [string, string, string];
     ign: string;
     ignPlaceholder: string;
     uid: string;
@@ -33,8 +33,13 @@ interface SignupFormProps {
     phoneHint: string;
     emailOptional: string;
     squad: string;
-    squadMember: (n: number) => string;
-    squadMemberUid: (n: number) => string;
+    squadMember: [string, string, string];
+    squadMemberUid: [string, string, string];
+    player: [string, string, string, string];
+    playerUid: [string, string, string, string];
+    substitute: string;
+    substituteUid: string;
+    substituteHint: string;
     abort: string;
     back: string;
     cont: string;
@@ -99,10 +104,16 @@ const squadMemberSchema = z.object({
     .regex(/^\d{6,20}$/),
 });
 
-function squadCountFor(mode: Mode): number {
-  if (mode === "Squad") return 3;
-  if (mode === "Duo") return 1;
-  return 0;
+// Number of mandatory player rows (manager is *not* a player anymore).
+// Solo = 1 player, Duo = 2, Squad = 4. Every mode gets one extra optional
+// substitute slot on top.
+function mandatoryPlayerCountFor(mode: Mode): number {
+  if (mode === "Squad") return 4;
+  if (mode === "Duo") return 2;
+  return 1;
+}
+function maxPlayerCountFor(mode: Mode): number {
+  return mandatoryPlayerCountFor(mode) + 1;
 }
 
 function emptyForm(mode: Mode, defaultEmail: string): FormState {
@@ -112,7 +123,9 @@ function emptyForm(mode: Mode, defaultEmail: string): FormState {
     discord_tag: "",
     contact_phone: "",
     email: defaultEmail,
-    squad: Array.from({ length: squadCountFor(mode) }, () => ({
+    // One slot per mandatory player + one optional substitute (always present so
+    // the manager can opt to fill it in).
+    squad: Array.from({ length: maxPlayerCountFor(mode) }, () => ({
       ign: "",
       pubg_uid: "",
     })),
@@ -128,7 +141,8 @@ export function SignupForm({
   copy,
 }: SignupFormProps) {
   const isAr = locale === "ar";
-  const squadCount = useMemo(() => squadCountFor(mode), [mode]);
+  const mandatoryCount = useMemo(() => mandatoryPlayerCountFor(mode), [mode]);
+  const maxCount = useMemo(() => maxPlayerCountFor(mode), [mode]);
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [form, setForm] = useState<FormState>(() => emptyForm(mode, defaultEmail ?? ""));
   const [error, setError] = useState<string | null>(null);
@@ -159,11 +173,18 @@ export function SignupForm({
       if (path === "email") return copy.errors.email;
       return copy.errors.generic;
     }
-    if (squadCount > 0) {
-      for (const m of form.squad) {
-        const memberCheck = squadMemberSchema.safeParse(m);
-        if (!memberCheck.success) return copy.errors.squad;
-      }
+    // First N rows are mandatory. The last row (substitute) is only validated
+    // if the manager filled in either field.
+    for (let i = 0; i < mandatoryCount; i += 1) {
+      const m = form.squad[i];
+      if (!m) return copy.errors.squad;
+      const check = squadMemberSchema.safeParse(m);
+      if (!check.success) return copy.errors.squad;
+    }
+    const sub = form.squad[mandatoryCount];
+    if (sub && (sub.ign.trim().length > 0 || sub.pubg_uid.trim().length > 0)) {
+      const check = squadMemberSchema.safeParse(sub);
+      if (!check.success) return copy.errors.squad;
     }
     return null;
   };
@@ -188,10 +209,14 @@ export function SignupForm({
       fd.set("discord_tag", form.discord_tag);
       fd.set("contact_phone", form.contact_phone);
       fd.set("email", form.email);
-      for (const m of form.squad) {
+      // Skip the substitute row if the manager left it empty.
+      form.squad.forEach((m, idx) => {
+        const isMandatory = idx < mandatoryCount;
+        const filled = m.ign.trim().length > 0 || m.pubg_uid.trim().length > 0;
+        if (!isMandatory && !filled) return;
         fd.append("squad_ign", m.ign);
         fd.append("squad_uid", m.pubg_uid);
-      }
+      });
 
       const result = await submitSignupAction(fd, { locale, slug });
       if (!result.success) {
@@ -225,7 +250,7 @@ export function SignupForm({
         aria-valuenow={step}
         aria-valuemin={1}
         aria-valuemax={3}
-        aria-label={copy.stepProgress(step, 3)}
+        aria-label={copy.stepProgress[step - 1]}
       >
         {[1, 2, 3].map((s) => (
           <div key={s} className="flex-1">
@@ -366,45 +391,59 @@ export function SignupForm({
             </div>
           </div>
 
-          {squadCount > 0 ? (
-            <div className="space-y-3">
-              <div className="field-label">{copy.squad}</div>
-              <div className="space-y-2">
-                {form.squad.map((m, i) => (
-                  <div key={i} className="grid gap-2 md:grid-cols-2">
-                    <input
-                      className="field"
-                      placeholder={copy.squadMember(i + 2)}
-                      value={m.ign}
-                      onChange={(e) => updateSquad(i, "ign", e.target.value)}
-                      minLength={2}
-                      maxLength={32}
-                      required
-                      autoComplete="off"
-                      aria-label={copy.squadMember(i + 2)}
-                    />
-                    <input
-                      className="field"
-                      placeholder={copy.squadMemberUid(i + 2)}
-                      value={m.pubg_uid}
-                      onChange={(e) =>
-                        updateSquad(
-                          i,
-                          "pubg_uid",
-                          e.target.value.replace(/\D+/g, ""),
-                        )
-                      }
-                      inputMode="numeric"
-                      pattern="\d{6,20}"
-                      required
-                      autoComplete="off"
-                      aria-label={copy.squadMemberUid(i + 2)}
-                    />
+          <div className="space-y-3">
+            <div className="field-label">{copy.squad}</div>
+            <div className="space-y-2">
+              {Array.from({ length: maxCount }).map((_, i) => {
+                const m = form.squad[i] ?? { ign: "", pubg_uid: "" };
+                const isSub = i >= mandatoryCount;
+                const ignLabel = isSub ? copy.substitute : copy.player[i];
+                const uidLabel = isSub ? copy.substituteUid : copy.playerUid[i];
+                return (
+                  <div key={i} className="space-y-1">
+                    {isSub ? (
+                      <div
+                        className="font-mono text-[10px] tracking-[0.2em] uppercase"
+                        style={{ color: "rgba(245,240,232,0.55)" }}
+                      >
+                        {copy.substituteHint}
+                      </div>
+                    ) : null}
+                    <div className="grid gap-2 md:grid-cols-2">
+                      <input
+                        className="field"
+                        placeholder={ignLabel}
+                        value={m.ign}
+                        onChange={(e) => updateSquad(i, "ign", e.target.value)}
+                        minLength={isSub ? 0 : 2}
+                        maxLength={32}
+                        required={!isSub}
+                        autoComplete="off"
+                        aria-label={ignLabel}
+                      />
+                      <input
+                        className="field"
+                        placeholder={uidLabel}
+                        value={m.pubg_uid}
+                        onChange={(e) =>
+                          updateSquad(
+                            i,
+                            "pubg_uid",
+                            e.target.value.replace(/\D+/g, ""),
+                          )
+                        }
+                        inputMode="numeric"
+                        pattern={isSub ? undefined : "\\d{6,20}"}
+                        required={!isSub}
+                        autoComplete="off"
+                        aria-label={uidLabel}
+                      />
+                    </div>
                   </div>
-                ))}
-              </div>
+                );
+              })}
             </div>
-          ) : null}
+          </div>
 
           {error ? (
             <div className="field-error" role="alert">

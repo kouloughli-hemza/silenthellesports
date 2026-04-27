@@ -5,7 +5,9 @@ import {
   countUpcomingEvents,
   getEventSignupCount,
   getUpcomingEvents,
+  getUserActiveSignupEventIds,
 } from "@/lib/data/events";
+import { getSessionUser } from "@/lib/auth/session";
 import { EventCard } from "@/components/public/event-card";
 import type { Locale } from "@/types/domain";
 
@@ -24,6 +26,14 @@ export async function EventsPreview({ locale }: EventsPreviewProps) {
 
   // Resolve signup counts for both cards in parallel.
   const signups = await Promise.all(events.map((e) => getEventSignupCount(e.id)));
+
+  const sessionUser = await getSessionUser();
+  const signedEventIds = sessionUser
+    ? await getUserActiveSignupEventIds(
+        sessionUser.id,
+        events.map((e) => e.id),
+      )
+    : new Set<string>();
 
   return (
     <section
@@ -61,6 +71,7 @@ export async function EventsPreview({ locale }: EventsPreviewProps) {
                 signupCount={signups[i] ?? 0}
                 locale={locale}
                 variant="upcoming"
+                alreadySigned={signedEventIds.has(event.id)}
               />
             ))}
           </div>
