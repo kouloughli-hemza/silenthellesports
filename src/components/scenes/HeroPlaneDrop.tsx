@@ -10,6 +10,7 @@
 // Reference: prototype-hero-plane-drop.html. Timings ported directly.
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { gsap } from "gsap";
 import { ParticleSystem } from "@/lib/animations/particles";
 import { createTimeline, shakeStage } from "@/lib/animations/timeline";
@@ -36,7 +37,6 @@ export function HeroPlaneDrop({
   const planeRef = useRef<HTMLDivElement | null>(null);
   const planeTiltRef = useRef<HTMLDivElement | null>(null);
   const trooperRef = useRef<HTMLDivElement | null>(null);
-  const chuteRef = useRef<SVGGElement | null>(null);
   const flashRef = useRef<HTMLDivElement | null>(null);
   const screenFlashRef = useRef<HTMLDivElement | null>(null);
   const groundLineRef = useRef<HTMLDivElement | null>(null);
@@ -201,10 +201,26 @@ export function HeroPlaneDrop({
       onCompleteRef.current();
     };
 
+    // Drop the crate when the plane's center reaches viewport center, so it
+    // visually falls FROM the plane mid-screen. dropTime is computed from the
+    // plane sweep math (CSS-left:-240, transform from -240 to width+240,
+    // linear ease over planeSweepDur). All downstream tweens (catch, descent,
+    // smoke, impact, dissolve) hang off dropTime.
+    const planeSweepDur = 5.5;
+    const planeWidth = 180;
+    const dropFraction =
+      (stageRect.width / 2 - planeWidth / 2 + 480) / (stageRect.width + 480);
+    const dropTime = dropFraction * planeSweepDur;
+    const planeXAtDrop = -240 + (stageRect.width + 480) * dropFraction;
+    const planeRearViewportPx = -240 + planeXAtDrop + 30;
+    const crateBaseLeftPx = stageRect.width * 0.38;
+    const crateInitialX = planeRearViewportPx - crateBaseLeftPx;
+    // Land near viewport center (where impact effects fire)
+    const crateLandingX = stageRect.width * 0.5 - crateBaseLeftPx - 36;
+
     gsap.set(planeRef.current, { x: -240, y: 0 });
     gsap.set(planeTiltRef.current, { rotation: 2 });
-    gsap.set(trooperRef.current, { x: 0, y: 0, opacity: 0, scale: 0.7, rotation: 0 });
-    gsap.set(chuteRef.current, { scaleY: 0, scaleX: 1, transformOrigin: "50% 100%" });
+    gsap.set(trooperRef.current, { x: crateInitialX, y: 0, opacity: 0, scale: 0.7, rotation: 0 });
     gsap.set(flashRef.current, { scale: 0, opacity: 0 });
     gsap.set(screenFlashRef.current, { opacity: 0 });
     gsap.set([sw1Ref.current, sw2Ref.current, sw3Ref.current], { scale: 0, opacity: 0 });
@@ -227,27 +243,32 @@ export function HeroPlaneDrop({
     tl.to(planeRef.current, { x: stageRect.width + 240, duration: 5.5, ease: "none" }, 0);
     tl.to(planeTiltRef.current, { rotation: -2, duration: 5.5, ease: "sine.inOut" }, 0);
 
-    // Trooper jump + chute deploy
-    tl.to(trooperRef.current, { opacity: 1, scale: 0.9, duration: 0.2, ease: "power2.out" }, 1.6);
-    tl.to(trooperRef.current, { y: 60, rotation: 25, duration: 0.6, ease: "power2.in" }, 1.6);
-    tl.to(chuteRef.current, { scaleY: 1.15, duration: 0.25, ease: "back.out(2.5)" }, 2.2);
-    tl.to(chuteRef.current, { scaleY: 1, duration: 0.15, ease: "power1.out" }, 2.45);
-    tl.to(trooperRef.current, { y: 40, rotation: 0, scale: 1, duration: 0.3, ease: "power2.out" }, 2.2);
-    tl.to(chuteRef.current, { rotation: 4, duration: 0.6, ease: "sine.inOut", repeat: 5, yoyo: true, transformOrigin: "50% 100%" }, 2.5);
+    // Airdrop crate (chute baked into the PNG) — appears when the plane is
+    // mid-screen, free-falls briefly, then "chute catches" with a small jerk
+    // and starts the gentle descent + sway. Velocity change sells the
+    // deploy moment.
+    tl.to(trooperRef.current, { opacity: 1, scale: 0.85, duration: 0.2, ease: "power2.out" }, dropTime);
+    tl.to(trooperRef.current, { y: 110, rotation: 6, duration: 0.6, ease: "power2.in" }, dropTime);
+    // Catch jerk — velocity drops, crate jolts upward and squares up
+    tl.to(trooperRef.current, { y: 100, rotation: 0, scale: 1, duration: 0.2, ease: "back.out(1.4)" }, dropTime + 0.6);
+    // Gentle sway during descent
+    tl.to(trooperRef.current, { rotation: 3, duration: 0.6, ease: "sine.inOut", repeat: 5, yoyo: true, transformOrigin: "50% 0%" }, dropTime + 0.9);
 
-    // Trooper descent — move within the visible stage
-    tl.to(trooperRef.current, { y: stageRect.height * 0.55, x: 30, duration: 3.0, ease: "power1.in" }, 2.5);
+    // Crate descent under the canopy — drifts horizontally to the landing
+    // center while gravity pulls it down
+    tl.to(trooperRef.current, { y: stageRect.height * 0.55, x: crateLandingX, duration: 2.3, ease: "power1.in" }, dropTime + 0.8);
+
+    // Impact lands ~3.1s after the crate first appears
+    const impact = dropTime + 3.1;
 
     // Smoke trail
-    tl.call(() => startSmoke(), undefined, 2.3);
-    tl.call(() => stopSmoke(), undefined, 5.4);
+    tl.call(() => startSmoke(), undefined, dropTime + 0.7);
+    tl.call(() => stopSmoke(), undefined, impact - 0.1);
 
-    // HUD chrome
-    tl.to("[data-bracket]", { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(2)", stagger: 0.05 }, 3.0);
-    tl.to("[data-hud]", { opacity: 0.7, duration: 0.5, ease: "power2.out", stagger: 0.1 }, 3.2);
-
-    // Impact at t=5.5
-    const impact = 5.5;
+    // HUD chrome — appears just before the drop so the scope-onto-target read
+    // is established by the time the crate exits the plane
+    tl.to("[data-bracket]", { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(2)", stagger: 0.05 }, Math.max(0.5, dropTime - 0.6));
+    tl.to("[data-hud]", { opacity: 0.7, duration: 0.5, ease: "power2.out", stagger: 0.1 }, Math.max(0.7, dropTime - 0.4));
     tl.to(trooperRef.current, { opacity: 0, duration: 0.05 }, impact);
     tl.call(() => spawnImpact(), undefined, impact);
     tl.to(screenFlashRef.current, { opacity: 0.7, duration: 0.08, ease: "power2.out" }, impact);
@@ -332,12 +353,26 @@ export function HeroPlaneDrop({
 
         <div ref={planeRef} style={{ position: "absolute", top: "26%", left: -240, willChange: "transform" }}>
           <div ref={planeTiltRef} style={{ transformOrigin: "center", willChange: "transform" }}>
-            <PlaneSVG />
+            <Image
+              src="/cinematic/c130.png"
+              alt=""
+              width={180}
+              height={100}
+              priority
+              style={{ display: "block" }}
+            />
           </div>
         </div>
 
         <div ref={trooperRef} style={{ position: "absolute", left: "38%", top: "28%", opacity: 0, willChange: "transform, opacity", transformOrigin: "center top" }}>
-          <TrooperSVG chuteRef={chuteRef} />
+          <Image
+            src="/cinematic/airdrop-crate.png"
+            alt=""
+            width={72}
+            height={100}
+            priority
+            style={{ display: "block" }}
+          />
         </div>
 
         <canvas ref={fxCanvasRef} style={{ position: "absolute", inset: 0, pointerEvents: "none" }} />
@@ -465,201 +500,3 @@ function Bracket({ position }: { position: "tl" | "tr" | "bl" | "br" }) {
   );
 }
 
-function PlaneSVG() {
-  // C-130 Hercules silhouette — long fuselage, T-tail, 4 turboprop engines on a
-  // straight high wing, open rear cargo ramp. Nose right, tail left (matches
-  // the L→R sweep). Light grey livery to match the actual PUBG cargo plane,
-  // with weathering streaks + faint orange exhaust glow.
-  return (
-    <svg width="280" height="100" viewBox="0 0 280 100" aria-hidden>
-      <defs>
-        <linearGradient id="hpd-fuselage" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#aab0a8" />
-          <stop offset="55%" stopColor="#7c8278" />
-          <stop offset="100%" stopColor="#4a4e48" />
-        </linearGradient>
-        <linearGradient id="hpd-wing" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#8a8f86" />
-          <stop offset="100%" stopColor="#454944" />
-        </linearGradient>
-        <radialGradient id="hpd-prop" cx="0.5" cy="0.5">
-          <stop offset="0%" stopColor="rgba(245,240,232,0.55)" />
-          <stop offset="60%" stopColor="rgba(245,240,232,0.15)" />
-          <stop offset="100%" stopColor="rgba(245,240,232,0)" />
-        </radialGradient>
-        <linearGradient id="hpd-exhaust" x1="1" y1="0" x2="0" y2="0">
-          <stop offset="0%" stopColor="rgba(255,69,0,0.35)" />
-          <stop offset="100%" stopColor="rgba(255,69,0,0)" />
-        </linearGradient>
-      </defs>
-
-      {/* Fuselage — long tube, slight droop toward tail */}
-      <path
-        d="M30 50
-           L42 38
-           L240 38
-           Q260 38 268 46
-           Q272 52 268 58
-           L262 62
-           Q252 66 240 66
-           L52 66
-           L34 62
-           Q26 56 30 50 Z"
-        fill="url(#hpd-fuselage)"
-        stroke="#0a0b05"
-        strokeWidth="0.6"
-      />
-
-      {/* Belly highlight */}
-      <ellipse cx="148" cy="64" rx="100" ry="2.2" fill="rgba(245,240,232,0.05)" />
-
-      {/* Cockpit windows (right side / nose) — multiple panes */}
-      <path d="M250 46 Q260 46 264 50 L262 54 L252 56 Z" fill="#1a1d1f" />
-      <path d="M252 48 L255 48 L255 51 L252 51 Z" fill="rgba(255,217,61,0.55)" />
-      <path d="M256 48 L260 49 L260 51 L256 51 Z" fill="rgba(255,217,61,0.45)" />
-      <path d="M252 52 L260 52 L260 54 L253 53.5 Z" fill="rgba(255,217,61,0.25)" />
-
-      {/* Side passenger windows — small dark dots along the fuselage */}
-      {[60, 76, 92, 108, 124, 140, 156, 172, 188, 204, 220, 236].map((x) => (
-        <rect key={x} x={x} y="48" width="2.4" height="2" fill="#1a1d1f" />
-      ))}
-
-      {/* Open rear cargo ramp — wedge cut at the tail showing dark interior */}
-      <path d="M30 66 L52 66 L46 80 L34 76 Z" fill="#1a1c1c" />
-      <path d="M34 70 L48 74" stroke="#FF4500" strokeWidth="0.4" opacity="0.45" />
-
-      {/* Wing — straight high wing, drawn ABOVE the fuselage so it reads as a
-          high-wing transport in side view */}
-      <rect x="62" y="28" width="174" height="5" fill="url(#hpd-wing)" stroke="#2a2c2a" strokeWidth="0.4" />
-      <line x1="62" y1="28" x2="236" y2="28" stroke="rgba(245,240,232,0.25)" strokeWidth="0.5" />
-
-      {/* 4 engine nacelles hanging UNDER the wing, visibly extending below
-          the fuselage so they read clearly */}
-      {[88, 124, 168, 204].map((x) => (
-        <g key={x}>
-          {/* pylon connecting wing to engine */}
-          <rect x={x - 1} y="33" width="2" height="6" fill="#3a3d38" />
-          {/* nacelle — long cigar shape */}
-          <ellipse cx={x} cy="44" rx="9" ry="5.5" fill="#6a6e68" stroke="#2a2c2a" strokeWidth="0.4" />
-          <ellipse cx={x} cy="44" rx="9" ry="2" fill="rgba(245,240,232,0.18)" />
-          {/* exhaust strip on nacelle bottom */}
-          <line x1={x + 4} y1="48" x2={x + 8} y2="48" stroke="#1a1c1c" strokeWidth="0.6" />
-          {/* propeller motion-blur disk in front of the nacelle */}
-          <ellipse cx={x - 9} cy="44" rx="2.8" ry="10" fill="url(#hpd-prop)" />
-          <ellipse cx={x - 9} cy="44" rx="0.9" ry="10" fill="rgba(245,240,232,0.32)" />
-          {/* spinner cone */}
-          <ellipse cx={x - 9} cy="44" rx="1.4" ry="1.6" fill="#2a2c2a" />
-        </g>
-      ))}
-
-      {/* Vertical tail — large, sweeps back-up from the rear */}
-      <path d="M34 50 L10 14 L26 16 L40 50 Z" fill="#5a5e58" stroke="#2a2c2a" strokeWidth="0.5" />
-      <line x1="14" y1="20" x2="36" y2="48" stroke="rgba(245,240,232,0.12)" strokeWidth="0.4" />
-
-      {/* T-tail horizontal stabilizer at top of the vertical fin */}
-      <rect x="0" y="11" width="36" height="3.5" fill="#6a6e68" stroke="#2a2c2a" strokeWidth="0.3" />
-      <rect x="0" y="11" width="36" height="0.8" fill="rgba(245,240,232,0.18)" />
-
-      {/* Engine exhaust glow trailing left */}
-      <ellipse cx="14" cy="52" rx="18" ry="2.4" fill="url(#hpd-exhaust)" />
-
-      {/* Wingtip nav lights */}
-      <circle cx="232" cy="37" r="1.3" fill="#E60013" />
-      <circle cx="232" cy="37" r="3" fill="rgba(230,0,19,0.35)" />
-      <circle cx="78" cy="37" r="1.1" fill="#33ff66" opacity="0.85" />
-
-      {/* Faint registration stencil */}
-      <text x="118" y="60" fontSize="4" fill="rgba(40,42,40,0.85)" fontFamily="monospace" letterSpacing="1.4">SH-130</text>
-
-      {/* Subtle weathering — darker streaks along the belly */}
-      <line x1="60" y1="63" x2="240" y2="63" stroke="rgba(20,20,20,0.4)" strokeWidth="0.4" />
-      <line x1="80" y1="65" x2="220" y2="65" stroke="rgba(20,20,20,0.25)" strokeWidth="0.3" />
-    </svg>
-  );
-}
-
-function TrooperSVG({ chuteRef }: { chuteRef: React.RefObject<SVGGElement | null> }) {
-  // PUBG default-style parachute: dark domed canopy with vertical fabric
-  // segments + heavy shroud-line bundle to a paratrooper with helmet, plate
-  // carrier, backpack and slung rifle. chuteRef wraps the dome so it scales
-  // open + sways without moving the trooper body.
-  return (
-    <svg width="80" height="118" viewBox="0 0 80 118" aria-hidden>
-      <defs>
-        <linearGradient id="hpd-canopy" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#3a3d3a" />
-          <stop offset="55%" stopColor="#22241f" />
-          <stop offset="100%" stopColor="#0c0d0a" />
-        </linearGradient>
-        <linearGradient id="hpd-canopy-shade" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="rgba(0,0,0,0)" />
-          <stop offset="100%" stopColor="rgba(0,0,0,0.55)" />
-        </linearGradient>
-      </defs>
-
-      {/* Domed canopy — full curved arch with vertical fabric segments */}
-      <g ref={chuteRef} style={{ transformOrigin: "50% 100%" }}>
-        {/* Outer dome silhouette */}
-        <path d="M2 38 Q40 -4 78 38 Q72 38 70 38 Q40 30 10 38 Q8 38 2 38 Z" fill="url(#hpd-canopy)" stroke="#0c0d0a" strokeWidth="0.5" />
-        {/* Vertical segment seams converge at apex */}
-        {[
-          "M40 -2 Q40 18 40 38",
-          "M40 -2 Q26 16 12 36",
-          "M40 -2 Q14 12 4 36",
-          "M40 -2 Q54 16 68 36",
-          "M40 -2 Q66 12 76 36",
-          "M40 -2 Q34 16 22 36",
-          "M40 -2 Q46 16 58 36",
-        ].map((d) => (
-          <path key={d} d={d} stroke="rgba(245,240,232,0.18)" strokeWidth="0.45" fill="none" />
-        ))}
-        {/* Underside shading */}
-        <path d="M4 32 Q40 26 76 32 Q72 38 70 38 Q40 30 10 38 Q8 38 4 32 Z" fill="url(#hpd-canopy-shade)" />
-        {/* Top accent stripe */}
-        <path d="M6 38 Q40 -2 74 38" stroke="rgba(245,240,232,0.22)" strokeWidth="0.5" fill="none" />
-        {/* Apex highlight */}
-        <ellipse cx="40" cy="6" rx="3" ry="1.4" fill="rgba(245,240,232,0.3)" />
-      </g>
-
-      {/* Shroud lines — converge from canopy down to risers */}
-      <line x1="6" y1="36" x2="36" y2="62" stroke="#1a1a1a" strokeWidth="0.55" />
-      <line x1="18" y1="36" x2="38" y2="62" stroke="#1a1a1a" strokeWidth="0.55" />
-      <line x1="30" y1="36" x2="39" y2="62" stroke="#1a1a1a" strokeWidth="0.55" />
-      <line x1="40" y1="36" x2="40" y2="62" stroke="#1a1a1a" strokeWidth="0.55" />
-      <line x1="50" y1="36" x2="41" y2="62" stroke="#1a1a1a" strokeWidth="0.55" />
-      <line x1="62" y1="36" x2="42" y2="62" stroke="#1a1a1a" strokeWidth="0.55" />
-      <line x1="74" y1="36" x2="44" y2="62" stroke="#1a1a1a" strokeWidth="0.55" />
-
-      {/* Heavy risers between shroud convergence and harness */}
-      <line x1="36" y1="60" x2="38" y2="68" stroke="#0a0a0a" strokeWidth="1.6" />
-      <line x1="44" y1="60" x2="42" y2="68" stroke="#0a0a0a" strokeWidth="1.6" />
-
-      {/* Helmet (round, with chinstrap suggestion) */}
-      <ellipse cx="40" cy="72" rx="6.2" ry="5.6" fill="#1a1d12" stroke="#0a0b05" strokeWidth="0.4" />
-      <path d="M34 71 Q40 65 46 71" stroke="rgba(245,240,232,0.08)" strokeWidth="0.6" fill="none" />
-      <path d="M34 76 L37 80 L43 80 L46 76" stroke="#0a0b05" strokeWidth="0.7" fill="none" />
-      {/* night-vision mount stub */}
-      <rect x="38.5" y="70.5" width="3" height="1.6" fill="#0a0b05" />
-
-      {/* Tactical vest / torso — blocky armored shape */}
-      <path d="M31 78 L49 78 L51 96 L46 100 L34 100 L29 96 Z" fill="#0a0a0a" stroke="#1a1c12" strokeWidth="0.3" />
-      {/* vest plates */}
-      <rect x="33" y="83" width="14" height="1.4" fill="#1a1c12" />
-      <rect x="34" y="86" width="5.5" height="6" fill="#1a1c12" stroke="#5a2a14" strokeWidth="0.3" />
-      <rect x="40.5" y="86" width="5.5" height="6" fill="#1a1c12" stroke="#5a2a14" strokeWidth="0.3" />
-      {/* backpack outline (subtle, behind torso) */}
-      <rect x="34" y="80" width="12" height="14" fill="#1a1c12" opacity="0.25" />
-      {/* unit patch */}
-      <rect x="38" y="93" width="4" height="2.5" fill="#E60013" />
-
-      {/* Legs — slight tuck (paratrooper drop pose) */}
-      <line x1="36" y1="100" x2="33" y2="108" stroke="#0a0a0a" strokeWidth="2.6" strokeLinecap="round" />
-      <line x1="44" y1="100" x2="47" y2="108" stroke="#0a0a0a" strokeWidth="2.6" strokeLinecap="round" />
-
-      {/* Slung rifle across the back */}
-      <line x1="32" y1="82" x2="22" y2="100" stroke="#2a1208" strokeWidth="1.8" strokeLinecap="round" />
-      <line x1="22" y1="100" x2="20" y2="103" stroke="#2a1208" strokeWidth="2.4" strokeLinecap="round" />
-      <line x1="29" y1="86" x2="25" y2="94" stroke="#5a2a14" strokeWidth="0.5" />
-    </svg>
-  );
-}
