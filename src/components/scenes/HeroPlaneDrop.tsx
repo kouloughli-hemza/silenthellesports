@@ -43,6 +43,7 @@ export function HeroPlaneDrop({
   const sw1Ref = useRef<HTMLDivElement | null>(null);
   const sw2Ref = useRef<HTMLDivElement | null>(null);
   const sw3Ref = useRef<HTMLDivElement | null>(null);
+  const logoRef = useRef<HTMLDivElement | null>(null);
   const fxCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const smokeCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const starsCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -228,6 +229,35 @@ export function HeroPlaneDrop({
     gsap.set("[data-bracket]", { opacity: 0, scale: 0.5 });
     gsap.set("[data-hud]", { opacity: 0 });
 
+    // Logo born from the impact fire and flies up to the EXACT spot the page
+    // hero's real logo occupies (queried from the DOM, since it's already
+    // mounted underneath us). Falls back to a sensible default if not found.
+    // The page logo is 400x474 natural ratio, rendered at width: min(360, 70vw).
+    const pageHeroLogo = document.querySelector(
+      'img[alt="Silent Hell Esports"]',
+    ) as HTMLImageElement | null;
+    let logoWidth: number;
+    let logoHeight: number;
+    let heroLogoX: number;
+    let heroLogoY: number;
+    if (pageHeroLogo) {
+      const r = pageHeroLogo.getBoundingClientRect();
+      logoWidth = r.width;
+      logoHeight = r.height;
+      heroLogoX = r.left;
+      heroLogoY = r.top;
+    } else {
+      logoWidth = Math.min(360, stageRect.width * 0.7);
+      logoHeight = logoWidth * (474 / 400);
+      heroLogoX = stageRect.width / 2 - logoWidth / 2;
+      heroLogoY = stageRect.height * 0.32 - logoHeight / 2;
+    }
+    // Born position: logo bottom hugs the impact line (~90% viewport) so the
+    // logo visually rises out of the fire rather than overflowing below it.
+    const logoBornX = stageRect.width / 2 - logoWidth / 2;
+    const logoBornY = stageRect.height * 0.92 - logoHeight;
+    gsap.set(logoRef.current, { width: logoWidth, height: logoHeight, x: logoBornX, y: logoBornY, scale: 0, opacity: 0, rotation: -10, transformOrigin: "50% 70%" });
+
     const tl = createTimeline({
       onComplete: () => {
         finish();
@@ -271,8 +301,8 @@ export function HeroPlaneDrop({
     tl.to("[data-hud]", { opacity: 0.7, duration: 0.5, ease: "power2.out", stagger: 0.1 }, Math.max(0.7, dropTime - 0.4));
     tl.to(trooperRef.current, { opacity: 0, duration: 0.05 }, impact);
     tl.call(() => spawnImpact(), undefined, impact);
-    tl.to(screenFlashRef.current, { opacity: 0.7, duration: 0.08, ease: "power2.out" }, impact);
-    tl.to(screenFlashRef.current, { opacity: 0, duration: 0.4, ease: "power2.in" }, impact + 0.08);
+    tl.to(screenFlashRef.current, { opacity: 0.45, duration: 0.08, ease: "power2.out" }, impact);
+    tl.to(screenFlashRef.current, { opacity: 0, duration: 0.3, ease: "power2.in" }, impact + 0.08);
     tl.to(flashRef.current, { scale: 1, opacity: 1, duration: 0.2, ease: "power2.out" }, impact);
     tl.to(flashRef.current, { opacity: 0, duration: 0.7, ease: "power2.in" }, impact + 0.2);
     tl.to(sw1Ref.current, { scale: 6, opacity: 0.9, duration: 0.5, ease: "power2.out" }, impact);
@@ -285,12 +315,17 @@ export function HeroPlaneDrop({
     tl.to(groundLineRef.current, { opacity: 0.3, duration: 0.5 }, impact + 0.5);
     tl.add(shakeStage(shakeEl, 28, 0.7), impact);
 
-    // No giant centered logo — the actual hero (already on the page) carries
-    // the brand mark. The cinematic just punches the impact, holds briefly,
-    // then dissolves so the user lands directly on the header.
-    const dissolveT = impact + 1.0;
+    // Logo BORN from the impact fire — punches up through the dust with a
+    // tumble, settles, then travels up to the big hero logo position. The
+    // cinematic dissolves at the tail of the travel so the cinematic logo
+    // fades out exactly where the page's real hero logo fades in.
+    tl.to(logoRef.current, { scale: 1.25, rotation: 4, opacity: 1, duration: 0.32, ease: "back.out(2.4)" }, impact + 0.12);
+    tl.to(logoRef.current, { scale: 1, rotation: 0, duration: 0.22, ease: "power2.out" }, impact + 0.44);
+    tl.to(logoRef.current, { x: heroLogoX, y: heroLogoY, duration: 0.7, ease: "power3.inOut" }, impact + 0.7);
+
+    const dissolveT = impact + 1.55;
     tl.add(shakeStage(shakeEl, 8, 0.35), dissolveT - 0.6);
-    tl.to(stage, { opacity: 0, duration: 0.55, ease: "power2.in" }, dissolveT);
+    tl.to(stage, { opacity: 0, duration: 0.45, ease: "power2.in" }, dissolveT);
 
     // Skip button visibility timer
     const skipTimer = setTimeout(() => setSkipVisible(true), 1500);
@@ -383,6 +418,14 @@ export function HeroPlaneDrop({
         <Shockwave ref={sw2Ref} color="var(--hell-red)" />
         <Shockwave ref={sw3Ref} color="var(--ember)" />
         <div ref={screenFlashRef} style={{ position: "absolute", inset: 0, background: "var(--hell-red)", opacity: 0, pointerEvents: "none", mixBlendMode: "screen" }} />
+
+        {/* Logo born from the impact fire, then flies up to where the real
+            big hero logo sits (viewport center, sized min(360, 70vw) — same
+            sizing rule the hero component uses, so the cinematic logo fades
+            out exactly where the page logo fades in). */}
+        <div ref={logoRef} style={{ position: "absolute", left: 0, top: 0, opacity: 0, pointerEvents: "none", willChange: "transform, opacity", zIndex: 10, filter: "drop-shadow(0 0 28px rgba(230,0,19,0.55))" }}>
+          <Image src="/logo.png" alt="" width={360} height={360} priority style={{ width: "100%", height: "auto", display: "block" }} />
+        </div>
 
         <Bracket position="tl" />
         <Bracket position="tr" />
