@@ -1,8 +1,14 @@
 "use client";
 
 // Always-on mount + scroll-lock wrapper for HeroPlaneDrop.
-// Plays the cinematic on every page load (not just first visit) per user
-// preference. Reduced motion still skips it.
+//
+// Pattern:
+//   - SSR renders an inline scroll-lock <style> + a static splash div so the
+//     page underneath is hidden from frame one.
+//   - On hydration we mount the cinematic (client-only since GSAP needs DOM).
+//     The splash stays painted on top until the cinematic has rendered, then
+//     we drop it on the next animation frame.
+//   - On complete/skip OR reduced motion: tear everything down.
 
 import { useEffect, useState } from "react";
 import { HeroPlaneDrop } from "./HeroPlaneDrop";
@@ -18,20 +24,28 @@ interface HeroOverlayMountProps {
 
 export function HeroOverlayMount(props: HeroOverlayMountProps) {
   const reduced = useReducedMotion();
-  const [open, setOpen] = useState(false);
-  const [hydrated, setHydrated] = useState(false);
+  const [open, setOpen] = useState(true);
+  const [cinematicReady, setCinematicReady] = useState(false);
+  const [splashVisible, setSplashVisible] = useState(true);
 
   useEffect(() => {
-    setHydrated(true);
-  }, []);
+    if (reduced) {
+      setOpen(false);
+      return;
+    }
+    setCinematicReady(true);
+  }, [reduced]);
 
   useEffect(() => {
-    if (!hydrated) return;
-    if (reduced) return;
-    setOpen(true);
-  }, [hydrated, reduced]);
+    if (!cinematicReady) return;
+    // Wait two frames so the cinematic has a chance to paint before we drop
+    // the splash — avoids any flicker of the underlying hero.
+    const id = requestAnimationFrame(() => {
+      requestAnimationFrame(() => setSplashVisible(false));
+    });
+    return () => cancelAnimationFrame(id);
+  }, [cinematicReady]);
 
-  // Body scroll lock while the overlay is up.
   useEffect(() => {
     if (!open) return;
     const prev = document.body.style.overflow;
@@ -44,10 +58,27 @@ export function HeroOverlayMount(props: HeroOverlayMountProps) {
   if (!open) return null;
 
   return (
-    <HeroPlaneDrop
-      {...props}
-      onComplete={() => {
-        setOpen(false);
+    <>
+      <style>{`html, body { overflow: hidden !important; }`}</style>
+      {splashVisible ? <HeroSplash /> : null}
+      {cinematicReady ? (
+        <HeroPlaneDrop {...props} onComplete={() => setOpen(false)} />
+      ) : null}
+    </>
+  );
+}
+
+function HeroSplash() {
+  return (
+    <div
+      aria-hidden
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 9001,
+        background:
+          "radial-gradient(ellipse at 50% 30%, #2a0a14 0%, #14050a 35%, #050203 70%, #000 100%)",
+        pointerEvents: "none",
       }}
     />
   );

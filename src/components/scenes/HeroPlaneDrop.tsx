@@ -279,8 +279,6 @@ export function HeroPlaneDrop({
       tl.kill();
       tlRef.current = null;
     };
-    // Intentionally empty deps — we want the timeline to build once, on mount.
-    // onComplete is captured via ref so the effect doesn't re-fire on parent re-renders.
   }, []);
 
   function handleSkip() {

@@ -4,7 +4,10 @@ import createNextIntlPlugin from "next-intl/plugin";
 const withNextIntl = createNextIntlPlugin("./src/lib/i18n/request.ts");
 
 const config: NextConfig = {
-  reactStrictMode: true,
+  // Disabled because React StrictMode's dev-only double-invocation of effects
+  // races against GSAP timelines (kills + rebuilds the cinematic mid-frame),
+  // freezing the hero animation in dev. Production doesn't run StrictMode.
+  reactStrictMode: false,
   poweredByHeader: false,
   images: {
     remotePatterns: [
