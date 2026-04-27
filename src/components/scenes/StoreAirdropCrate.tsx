@@ -184,42 +184,51 @@ function CrateOverlay({ badgeLabel, newDropLabel, onComplete }: CrateOverlayProp
       <div ref={shakeRef} style={{ position: "absolute", inset: 0, willChange: "transform" }}>
         <canvas ref={fxRef} style={{ position: "absolute", inset: 0, pointerEvents: "none" }} />
 
-        {/* Parachute above crate */}
+        {/* Ram-air parafoil above the crate (red, with visible cells + slight tear) */}
         <div
           ref={chuteRef}
           style={{
             position: "absolute",
             left: "50%",
-            top: "calc(50% - 160px)",
+            top: "calc(50% - 200px)",
             transform: "translate(-50%, 0)",
-            width: 200,
-            height: 100,
+            width: 240,
+            height: 120,
             pointerEvents: "none",
           }}
         >
-          <svg width="200" height="100" viewBox="0 0 200 100" aria-hidden>
+          <svg width="240" height="120" viewBox="0 0 240 120" aria-hidden>
             <defs>
-              <radialGradient id="ac-canopy" cx="0.5" cy="0.7">
+              <linearGradient id="ac-canopy" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="#FF4500" />
                 <stop offset="55%" stopColor="#E60013" />
                 <stop offset="100%" stopColor="#5a000c" />
-              </radialGradient>
+              </linearGradient>
+              <linearGradient id="ac-canopy-shade" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="rgba(0,0,0,0)" />
+                <stop offset="100%" stopColor="rgba(0,0,0,0.55)" />
+              </linearGradient>
             </defs>
-            <path
-              d="M2 60 Q100 -16 198 60 L188 60 L172 38 L150 60 L128 38 L100 60 L72 38 L50 60 L28 38 L12 60 Z"
-              fill="url(#ac-canopy)"
-              stroke="#330006"
-              strokeWidth="0.6"
-            />
-            <line x1="6" y1="60" x2="92" y2="98" stroke="#1a1a1a" strokeWidth="0.7" />
-            <line x1="40" y1="60" x2="96" y2="98" stroke="#1a1a1a" strokeWidth="0.7" />
-            <line x1="100" y1="60" x2="100" y2="98" stroke="#1a1a1a" strokeWidth="0.7" />
-            <line x1="160" y1="60" x2="104" y2="98" stroke="#1a1a1a" strokeWidth="0.7" />
-            <line x1="194" y1="60" x2="108" y2="98" stroke="#1a1a1a" strokeWidth="0.7" />
+            {/* Canopy wing shape */}
+            <path d="M6 50 Q120 6 234 50 L234 70 Q120 56 6 70 Z" fill="url(#ac-canopy)" stroke="#330006" strokeWidth="0.6" />
+            {/* Cell dividers */}
+            {[34, 64, 94, 120, 146, 176, 206].map((x) => (
+              <line key={x} x1={x} y1="42" x2={x} y2="66" stroke="#330006" strokeWidth="0.6" />
+            ))}
+            {/* Underside shading */}
+            <path d="M6 64 Q120 50 234 64 L234 70 Q120 56 6 70 Z" fill="url(#ac-canopy-shade)" />
+            {/* Leading-edge highlight */}
+            <path d="M8 50 Q120 8 232 50" stroke="rgba(255,217,61,0.4)" strokeWidth="0.7" fill="none" />
+            {/* Slight tear notch */}
+            <path d="M198 50 L202 56 L206 50" stroke="#330006" strokeWidth="0.6" fill="none" />
+            {/* Shroud lines converging to crate hardpoints */}
+            {[12, 36, 64, 92, 120, 148, 176, 204, 228].map((x, i) => (
+              <line key={i} x1={x} y1="70" x2={120 + (x - 120) * 0.18} y2="118" stroke="#1a1a1a" strokeWidth="0.7" />
+            ))}
           </svg>
         </div>
 
-        {/* Crate */}
+        {/* Crate — canonical PUBG airdrop: red body, blue top, black cross straps */}
         <div
           ref={crateRef}
           style={{
@@ -227,66 +236,134 @@ function CrateOverlay({ badgeLabel, newDropLabel, onComplete }: CrateOverlayProp
             left: "50%",
             top: "calc(50% - 60px)",
             transform: "translate(-50%, 0)",
-            width: 120,
-            height: 120,
+            width: 140,
+            height: 140,
             pointerEvents: "none",
           }}
         >
+          {/* Body — bright crimson with inset shading */}
           <div
             style={{
               position: "absolute",
               inset: 0,
-              background: "linear-gradient(135deg, #2a1208 0%, #1a0a04 50%, #0a0402 100%)",
-              border: "2px solid #5a2a14",
-              boxShadow: "0 0 24px rgba(230,0,19,0.4), inset 0 0 20px rgba(0,0,0,0.6)",
+              background: "linear-gradient(155deg, #d8232f 0%, #b81824 55%, #82111a 100%)",
+              border: "2px solid #4a070d",
+              boxShadow: "0 0 36px rgba(216,35,47,0.55), inset 0 0 30px rgba(0,0,0,0.5), inset 0 2px 0 rgba(255,255,255,0.12)",
             }}
           />
-          {/* Hazard stripes */}
+
+          {/* Vertical black strap (front center) */}
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              bottom: 0,
+              left: "50%",
+              transform: "translateX(-50%)",
+              width: 14,
+              background: "linear-gradient(90deg, #050505 0%, #1a1a1a 50%, #050505 100%)",
+              borderLeft: "1px solid #000",
+              borderRight: "1px solid #000",
+            }}
+          />
+
+          {/* Horizontal black strap (front mid) */}
           <div
             style={{
               position: "absolute",
               left: 0,
               right: 0,
-              top: "40%",
+              top: "50%",
+              transform: "translateY(-50%)",
               height: 14,
-              background: "repeating-linear-gradient(45deg, var(--gold) 0 8px, #1a0a04 8px 16px)",
-              opacity: 0.85,
+              background: "linear-gradient(180deg, #050505 0%, #1a1a1a 50%, #050505 100%)",
+              borderTop: "1px solid #000",
+              borderBottom: "1px solid #000",
             }}
           />
-          {/* Crate label */}
+
+          {/* Strap buckle / hardware in center */}
+          <div
+            style={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              width: 18,
+              height: 18,
+              background: "linear-gradient(135deg, #2a2a2a 0%, #050505 100%)",
+              border: "1px solid #000",
+              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.15)",
+            }}
+          />
+
+          {/* Silent Hell badge — sits in one of the red panels */}
           <div
             className="font-mono"
             style={{
               position: "absolute",
-              bottom: 8,
-              left: 0,
-              right: 0,
-              textAlign: "center",
-              fontSize: 9,
+              top: 14,
+              left: 14,
+              fontSize: 8,
               letterSpacing: "0.25em",
-              color: "var(--gold)",
+              color: "#fff",
               fontWeight: 700,
+              opacity: 0.92,
+              textShadow: "0 1px 0 rgba(0,0,0,0.6)",
             }}
           >
             {badgeLabel}
           </div>
 
-          {/* Lid */}
+          {/* Strobe light on top — pulsing red */}
+          <div
+            style={{
+              position: "absolute",
+              top: -10,
+              left: "50%",
+              transform: "translateX(-50%)",
+              width: 12,
+              height: 12,
+              borderRadius: "50%",
+              background: "radial-gradient(circle, #FFD93D 0%, #FF4500 30%, #E60013 70%, #5a000c 100%)",
+              boxShadow: "0 0 16px #FF4500, 0 0 28px rgba(230,0,19,0.7)",
+              animation: "ac-strobe 0.65s ease-in-out infinite",
+              zIndex: 2,
+            }}
+          />
+
+          {/* BLUE top / lid — segmented grid like the real crate */}
           <div
             ref={lidRef}
             style={{
               position: "absolute",
-              left: -2,
-              right: -2,
-              top: -8,
-              height: 14,
-              background: "linear-gradient(135deg, #5a2a14 0%, #2a1208 100%)",
-              border: "2px solid #5a2a14",
+              left: -6,
+              right: -6,
+              top: -22,
+              height: 28,
+              background: "linear-gradient(180deg, #2a86d6 0%, #1f6cb6 60%, #16548f 100%)",
+              border: "2px solid #0d3a66",
+              borderBottom: "none",
+              boxShadow: "inset 0 2px 0 rgba(255,255,255,0.18), 0 -2px 6px rgba(31,108,182,0.3)",
               willChange: "transform, opacity",
               transformOrigin: "50% 100%",
             }}
-          />
+          >
+            {/* 3-cell grid pattern on the blue top */}
+            <div style={{ position: "absolute", top: 0, bottom: 0, left: "33.3%", width: 2, background: "rgba(13,58,102,0.8)" }} />
+            <div style={{ position: "absolute", top: 0, bottom: 0, left: "66.6%", width: 2, background: "rgba(13,58,102,0.8)" }} />
+            <div style={{ position: "absolute", left: 0, right: 0, top: "50%", height: 1.5, background: "rgba(13,58,102,0.6)" }} />
+            {/* highlight strip */}
+            <div style={{ position: "absolute", top: 2, left: 4, right: 4, height: 1.5, background: "rgba(255,255,255,0.25)" }} />
+          </div>
         </div>
+
+        <style jsx>{`
+          @keyframes ac-strobe {
+            0%, 100% { opacity: 1; transform: translateX(-50%) scale(1); }
+            50% { opacity: 0.4; transform: translateX(-50%) scale(0.85); }
+          }
+        `}</style>
 
         {/* NEW DROP badge stamp */}
         <div
