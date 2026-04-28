@@ -38,6 +38,15 @@
     "metaTitle": "Silent Hell — Chronicle & telemetry",
     "metaDescription": "The full Silent Hell Esports timeline and team stats."
   },
+  "careerMap": {
+    "eyebrow": "// CAREER MAP",
+    "t1": "Every drop tells",
+    "t2": "the story.",
+    "sub": "Plotted on Erangel. Every milestone is a landing zone. Tap a node to relive it.",
+    "here": "We are here",
+    "landmark": "Landed at",
+    "tapHint": "Tap a marker to inspect"
+  },
   "skipToContent": "Skip to content",
   "common": {
     "loading": "Loading",

@@ -255,7 +255,7 @@ function BoardCanvas({
             fill
             sizes="(max-width: 768px) 100vw, 720px"
             style={{ objectFit: "cover", pointerEvents: "none" }}
-            priority={false}
+            loading="eager"
             draggable={false}
           />
         ) : (

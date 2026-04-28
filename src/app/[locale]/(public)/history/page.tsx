@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 
+import { CareerMap } from "@/components/public/career-map";
 import { Chronicle } from "@/components/public/chronicle";
 import { StatsWall } from "@/components/public/stats-wall";
 import { isLocale } from "@/lib/i18n/routing";
@@ -42,6 +43,7 @@ export default async function HistoryPage({
   return (
     <>
       <StatsWall locale={locale as Locale} />
+      <CareerMap locale={locale as Locale} />
       <Chronicle locale={locale as Locale} variant="page" />
     </>
   );

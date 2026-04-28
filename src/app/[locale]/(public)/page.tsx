@@ -4,7 +4,7 @@ import { Hero } from "@/components/public/hero";
 import { RosterStrip } from "@/components/public/roster-strip";
 import { TrophyCase } from "@/components/public/trophy-case";
 import { StatsWall } from "@/components/public/stats-wall";
-import { Chronicle } from "@/components/public/chronicle";
+import { CareerMap } from "@/components/public/career-map";
 import { TacticsBoard } from "@/components/public/tactics-board";
 import { SocialsBlock } from "@/components/public/socials-block";
 import { EventsPreview } from "@/components/public/events-preview";
@@ -38,7 +38,7 @@ export default async function HomePage({
       <TacticsBoard locale={locale} />
       <TrophyCase locale={locale} />
       <StatsWall locale={locale} />
-      <Chronicle locale={locale} variant="home" limit={6} />
+      <CareerMap locale={locale} variant="home" />
       <StorePreview locale={locale} />
       <EventsPreview locale={locale} />
       <GiveawayHero locale={locale} />
