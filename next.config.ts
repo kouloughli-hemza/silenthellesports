@@ -13,6 +13,9 @@ const config: NextConfig = {
     remotePatterns: [
       { protocol: "https", hostname: "*.supabase.co" },
       { protocol: "https", hostname: "*.supabase.in" },
+      // PUBG map images for the seeded tactic boards. Replace with admin
+      // uploads to your own Supabase bucket whenever you want to detach.
+      { protocol: "https", hostname: "raw.githubusercontent.com" },
     ],
   },
   typedRoutes: true,

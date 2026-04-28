@@ -21,6 +21,9 @@ interface NavItem {
     | "/admin/products"
     | "/admin/roster"
     | "/admin/trophies"
+    | "/admin/chronicle"
+    | "/admin/stats"
+    | "/admin/tactics"
     | "/admin/pages"
     | "/admin/site-config"
     | "/admin/users"
@@ -36,6 +39,9 @@ const NAV: NavItem[] = [
   { href: "/admin/products", labelKey: "products" },
   { href: "/admin/roster", labelKey: "roster" },
   { href: "/admin/trophies", labelKey: "trophies" },
+  { href: "/admin/chronicle", labelKey: "chronicle" },
+  { href: "/admin/stats", labelKey: "stats" },
+  { href: "/admin/tactics", labelKey: "tactics" },
   { href: "/admin/pages", labelKey: "pages" },
   { href: "/admin/site-config", labelKey: "siteConfig" },
   { href: "/admin/users", labelKey: "users" },

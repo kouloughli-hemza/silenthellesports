@@ -37,6 +37,7 @@ const ConfigSchemas = {
   "giveaway.current_drop": z.number().int(),
   sponsors: z.array(z.string()),
   "shipping.from_wilaya_code": z.number().int().min(1).max(58),
+  "tactics.enabled": z.boolean(),
 } as const;
 
 type ConfigKey = keyof typeof ConfigSchemas;
@@ -64,6 +65,7 @@ const DEFAULTS: { [K in ConfigKey]: ConfigValue<K> } = {
   "giveaway.current_drop": 3,
   sponsors: ["Logitech G", "Red Bull Gaming", "HyperX", "Victrix", "Monster Energy"],
   "shipping.from_wilaya_code": 16,
+  "tactics.enabled": true,
 };
 
 export async function getSiteConfig<K extends ConfigKey>(key: K): Promise<ConfigValue<K>> {

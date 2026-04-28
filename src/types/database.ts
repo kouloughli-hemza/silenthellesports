@@ -184,6 +184,147 @@ export type Database = {
         };
         Relationships: [];
       };
+      tactic_boards: {
+        Row: {
+          id: string;
+          title: Json;
+          description: Json;
+          map_name: string;
+          map_image_url: string | null;
+          drop_x: number;
+          drop_y: number;
+          rotation_points: Json;
+          display_order: number;
+          is_published: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          title: Json;
+          description?: Json;
+          map_name: string;
+          map_image_url?: string | null;
+          drop_x: number;
+          drop_y: number;
+          rotation_points?: Json;
+          display_order?: number;
+          is_published?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          title?: Json;
+          description?: Json;
+          map_name?: string;
+          map_image_url?: string | null;
+          drop_x?: number;
+          drop_y?: number;
+          rotation_points?: Json;
+          display_order?: number;
+          is_published?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      team_milestones: {
+        Row: {
+          id: string;
+          occurred_on: string;
+          category:
+            | "founding"
+            | "tournament_win"
+            | "roster"
+            | "milestone"
+            | "release"
+            | "partnership"
+            | "other";
+          title: Json;
+          description: Json;
+          image_url: string | null;
+          display_order: number;
+          is_published: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          occurred_on: string;
+          category:
+            | "founding"
+            | "tournament_win"
+            | "roster"
+            | "milestone"
+            | "release"
+            | "partnership"
+            | "other";
+          title: Json;
+          description?: Json;
+          image_url?: string | null;
+          display_order?: number;
+          is_published?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          occurred_on?: string;
+          category?:
+            | "founding"
+            | "tournament_win"
+            | "roster"
+            | "milestone"
+            | "release"
+            | "partnership"
+            | "other";
+          title?: Json;
+          description?: Json;
+          image_url?: string | null;
+          display_order?: number;
+          is_published?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      team_stats: {
+        Row: {
+          id: string;
+          key: string;
+          label: Json;
+          value: number;
+          suffix: string | null;
+          display_order: number;
+          is_published: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          key: string;
+          label: Json;
+          value?: number;
+          suffix?: string | null;
+          display_order?: number;
+          is_published?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          key?: string;
+          label?: Json;
+          value?: number;
+          suffix?: string | null;
+          display_order?: number;
+          is_published?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       events: {
         Row: {
           id: string;

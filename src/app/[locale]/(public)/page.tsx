@@ -3,6 +3,9 @@ import { notFound } from "next/navigation";
 import { Hero } from "@/components/public/hero";
 import { RosterStrip } from "@/components/public/roster-strip";
 import { TrophyCase } from "@/components/public/trophy-case";
+import { StatsWall } from "@/components/public/stats-wall";
+import { Chronicle } from "@/components/public/chronicle";
+import { TacticsBoard } from "@/components/public/tactics-board";
 import { SocialsBlock } from "@/components/public/socials-block";
 import { EventsPreview } from "@/components/public/events-preview";
 import { StorePreview } from "@/components/public/store-preview";
@@ -32,7 +35,10 @@ export default async function HomePage({
       />
       <Hero locale={locale} />
       <RosterStrip locale={locale} />
+      <TacticsBoard locale={locale} />
       <TrophyCase locale={locale} />
+      <StatsWall locale={locale} />
+      <Chronicle locale={locale} variant="home" limit={6} />
       <StorePreview locale={locale} />
       <EventsPreview locale={locale} />
       <GiveawayHero locale={locale} />

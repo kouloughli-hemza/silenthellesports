@@ -3,6 +3,41 @@
     "title": "Silent Hell Esports — The last sound you don't hear.",
     "description": "Silent Hell Esports — Algerian PUBG Mobile esports team. Roster, tournaments, merch, giveaways."
   },
+  "stats": {
+    "eyebrow": "// TEAM TELEMETRY",
+    "t1": "Numbers",
+    "t2": "don't lie.",
+    "sub": "Logged. Sealed. Stamped in red ink."
+  },
+  "tactics": {
+    "eyebrow": "// TACTICS BOARD",
+    "t1": "We don't drop.",
+    "t2": "We deploy.",
+    "sub": "Signature drop, signature rotation. Read it. Memorise it.",
+    "drop": "Drop",
+    "rotation": "Rotation"
+  },
+  "chronicle": {
+    "eyebrow": "// THE CHRONICLE",
+    "t1": "Where it ",
+    "t2": "began.",
+    "sub": "Every drop. Every kill. Every silence before the storm.",
+    "ctaFull": "Read the full chronicle",
+    "empty": "Story still being written.",
+    "category": {
+      "founding": "Founding",
+      "tournament_win": "Tournament win",
+      "roster": "Roster move",
+      "milestone": "Milestone",
+      "release": "Release",
+      "partnership": "Partnership",
+      "other": "Note"
+    }
+  },
+  "history": {
+    "metaTitle": "Silent Hell — Chronicle & telemetry",
+    "metaDescription": "The full Silent Hell Esports timeline and team stats."
+  },
   "skipToContent": "Skip to content",
   "common": {
     "loading": "Loading",
@@ -596,6 +631,9 @@
       "products": "Products",
       "roster": "Roster",
       "trophies": "Trophies",
+      "chronicle": "Chronicle",
+      "stats": "Stats wall",
+      "tactics": "Tactics",
       "pages": "Pages",
       "siteConfig": "Site Config",
       "users": "Users",

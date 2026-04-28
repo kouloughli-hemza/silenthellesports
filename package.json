@@ -16,7 +16,9 @@
     "db:push": "supabase db push",
     "seed:liquipedia": "tsx --conditions=react-server scripts/seed-from-liquipedia.ts",
     "seed:team": "tsx --conditions=react-server scripts/seed-team-data.ts",
-    "seed:demo": "tsx --conditions=react-server scripts/seed-demo-content.ts"
+    "seed:demo": "tsx --conditions=react-server scripts/seed-demo-content.ts",
+    "seed:chronicle": "tsx --conditions=react-server scripts/seed-team-chronicle.ts",
+    "seed:tactics": "tsx --conditions=react-server scripts/seed-tactics.ts"
   },
   "dependencies": {
     "@sentry/nextjs": "^10.50.0",

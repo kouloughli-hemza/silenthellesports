@@ -87,6 +87,19 @@ export type Giveaway = Row<"giveaways">;
 export type GiveawayEntry = Row<"giveaway_entries">;
 export type Page = Row<"pages">;
 export type Profile = Row<"profiles">;
+export type TeamMilestone = Row<"team_milestones">;
+export type TeamStat = Row<"team_stats">;
+export type TacticBoard = Row<"tactic_boards">;
+export const MILESTONE_CATEGORIES = [
+  "founding",
+  "tournament_win",
+  "roster",
+  "milestone",
+  "release",
+  "partnership",
+  "other",
+] as const;
+export type MilestoneCategory = (typeof MILESTONE_CATEGORIES)[number];
 
 // Returns the event's map list (new `maps jsonb` array) with a fallback to the
 // legacy single-map column for older rows that haven't been backfilled.
