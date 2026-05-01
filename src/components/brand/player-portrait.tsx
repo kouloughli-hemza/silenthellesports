@@ -42,7 +42,12 @@ export function PlayerPortrait({
           sizes={sizes}
           priority={priority}
           style={{
-            objectFit: "cover",
+            // contain (not cover) so the player's face / full body isn't
+            // cropped when the source aspect doesn't match the frame.
+            objectFit: "contain",
+            // Image lives over an --ash-3 background so any letterbox bars
+            // read as part of the brand frame rather than transparent gaps.
+            background: "var(--ash-3)",
             filter: grayscale
               ? "grayscale(0.7) contrast(1.05) brightness(0.9)"
               : "contrast(1.05) brightness(0.95)",
@@ -68,14 +73,6 @@ export function PlayerPortrait({
       )}
       {/* Red bracket overlay — sits on top of the image so cards still read as
           part of the brand grid even when the photo fills the frame. */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            "linear-gradient(180deg, rgba(0,0,0,0) 60%, rgba(0,0,0,0.55) 100%)",
-        }}
-      />
       <div
         aria-hidden
         className="pointer-events-none absolute top-2 left-2 h-3 w-3 border-t-2 border-l-2"
