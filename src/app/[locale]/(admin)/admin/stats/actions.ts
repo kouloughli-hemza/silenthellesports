@@ -1,10 +1,11 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { z } from "zod";
 import { requireAdmin } from "@/lib/admin/guard";
 import { recordAudit } from "@/lib/admin/audit";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { TAG_STATS } from "@/lib/data/team";
 import { fail, ok, type Result } from "@/types/domain";
 
 const Translated = z.object({ en: z.string().min(1), ar: z.string().min(1) });
@@ -47,6 +48,7 @@ export async function createStatAction(input: StatInput): Promise<Result<{ id: s
     entityId: data.id,
     after: { key: parsed.data.key },
   });
+  revalidateTag(TAG_STATS);
   revalidatePath("/", "layout");
   return ok({ id: data.id });
 }
@@ -73,6 +75,7 @@ export async function updateStatAction(
     entityId: id,
     after: { key: parsed.data.key },
   });
+  revalidateTag(TAG_STATS);
   revalidatePath("/", "layout");
   return ok({ id });
 }
@@ -89,6 +92,7 @@ export async function deleteStatAction(id: string): Promise<Result<{ id: string 
     entityType: "team_stats",
     entityId: id,
   });
+  revalidateTag(TAG_STATS);
   revalidatePath("/", "layout");
   return ok({ id });
 }

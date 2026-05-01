@@ -1,10 +1,11 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { z } from "zod";
 import { requireAdmin } from "@/lib/admin/guard";
 import { recordAudit } from "@/lib/admin/audit";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { TAG_PRODUCTS } from "@/lib/data/products";
 import { fail, ok, type Result } from "@/types/domain";
 import { PRODUCT_CATEGORIES } from "@/lib/admin/data/products";
 
@@ -49,6 +50,7 @@ export async function createProductAction(input: ProductInput): Promise<Result<{
     entityId: data.id,
     after: { slug: parsed.data.slug },
   });
+  revalidateTag(TAG_PRODUCTS);
   revalidatePath("/", "layout");
   return ok({ id: data.id });
 }
@@ -75,6 +77,7 @@ export async function updateProductAction(
     entityId: id,
     after: { slug: parsed.data.slug, is_active: parsed.data.is_active },
   });
+  revalidateTag(TAG_PRODUCTS);
   revalidatePath("/", "layout");
   return ok({ id });
 }
@@ -91,6 +94,7 @@ export async function deleteProductAction(id: string): Promise<Result<{ id: stri
     entityType: "products",
     entityId: id,
   });
+  revalidateTag(TAG_PRODUCTS);
   revalidatePath("/", "layout");
   return ok({ id });
 }

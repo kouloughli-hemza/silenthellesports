@@ -52,6 +52,7 @@ export function CartLineRow({
     if (pending) return;
     startTransition(async () => {
       await updateLineAction(productId, variantId, next);
+      window.dispatchEvent(new CustomEvent("cart-changed"));
     });
   };
 
@@ -59,6 +60,7 @@ export function CartLineRow({
     if (pending) return;
     startTransition(async () => {
       await removeLineAction(productId, variantId);
+      window.dispatchEvent(new CustomEvent("cart-changed"));
     });
   };
 

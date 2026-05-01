@@ -1,10 +1,11 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { z } from "zod";
 import { requireAdmin } from "@/lib/admin/guard";
 import { recordAudit } from "@/lib/admin/audit";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { TAG_TROPHIES } from "@/lib/data/trophies";
 import { fail, ok, type Result } from "@/types/domain";
 
 const Translated = z.object({ en: z.string().min(1), ar: z.string().min(1) });
@@ -42,6 +43,7 @@ export async function createTrophyAction(input: TrophyInput): Promise<Result<{ i
     entityId: data.id,
     after: parsed.data,
   });
+  revalidateTag(TAG_TROPHIES);
   revalidatePath("/", "layout");
   return ok({ id: data.id });
 }
@@ -65,6 +67,7 @@ export async function updateTrophyAction(
     entityId: id,
     after: parsed.data,
   });
+  revalidateTag(TAG_TROPHIES);
   revalidatePath("/", "layout");
   return ok({ id });
 }
@@ -81,6 +84,7 @@ export async function deleteTrophyAction(id: string): Promise<Result<{ id: strin
     entityType: "trophies",
     entityId: id,
   });
+  revalidateTag(TAG_TROPHIES);
   revalidatePath("/", "layout");
   return ok({ id });
 }

@@ -1,26 +1,42 @@
 import "server-only";
+import { unstable_cache as cache } from "next/cache";
 import { createPublicClient } from "@/lib/supabase/public";
 import type { Trophy } from "@/types/domain";
 
+export const TAG_TROPHIES = "trophies";
+const REVALIDATE = 60;
+
 export async function getRecentTrophies(limit = 6): Promise<Trophy[]> {
-  const supabase = createPublicClient();
-  const { data, error } = await supabase
-    .from("trophies")
-    .select("*")
-    .order("date", { ascending: false })
-    .limit(limit);
-  if (error || !data) return [];
-  return data as unknown as Trophy[];
+  return cache(
+    async () => {
+      const supabase = createPublicClient();
+      const { data, error } = await supabase
+        .from("trophies")
+        .select("*")
+        .order("date", { ascending: false })
+        .limit(limit);
+      if (error || !data) return [];
+      return data as unknown as Trophy[];
+    },
+    ["trophies-recent", String(limit)],
+    { revalidate: REVALIDATE, tags: [TAG_TROPHIES] },
+  )();
 }
 
 export async function getAllTrophies(): Promise<Trophy[]> {
-  const supabase = createPublicClient();
-  const { data, error } = await supabase
-    .from("trophies")
-    .select("*")
-    .order("date", { ascending: false });
-  if (error || !data) return [];
-  return data as unknown as Trophy[];
+  return cache(
+    async () => {
+      const supabase = createPublicClient();
+      const { data, error } = await supabase
+        .from("trophies")
+        .select("*")
+        .order("date", { ascending: false });
+      if (error || !data) return [];
+      return data as unknown as Trophy[];
+    },
+    ["trophies-all"],
+    { revalidate: REVALIDATE, tags: [TAG_TROPHIES] },
+  )();
 }
 
 export interface TrophyStats {

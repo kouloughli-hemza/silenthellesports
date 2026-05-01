@@ -16,6 +16,7 @@ export function SignOutButton({ label }: SignOutButtonProps) {
       onClick={() =>
         startTransition(async () => {
           await signOutAction();
+          window.dispatchEvent(new CustomEvent("auth-changed"));
         })
       }
       disabled={pending}

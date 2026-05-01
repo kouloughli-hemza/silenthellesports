@@ -1,11 +1,12 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireAdmin } from "@/lib/admin/guard";
 import { recordAudit } from "@/lib/admin/audit";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { TAG_PLAYERS } from "@/lib/data/players";
 import { fail, ok, type Result } from "@/types/domain";
 import { PLAYER_ROLES } from "@/lib/admin/data/players";
 
@@ -79,6 +80,7 @@ export async function createPlayerAction(input: PlayerInput): Promise<Result<{ i
     entityId: data.id,
     after: parsed.data,
   });
+  revalidateTag(TAG_PLAYERS);
   revalidatePath("/", "layout");
   return ok({ id: data.id });
 }
@@ -105,6 +107,7 @@ export async function updatePlayerAction(
     entityId: id,
     after: parsed.data,
   });
+  revalidateTag(TAG_PLAYERS);
   revalidatePath("/", "layout");
   return ok({ id });
 }
@@ -121,6 +124,7 @@ export async function deletePlayerAction(id: string): Promise<Result<{ id: strin
     entityType: "players",
     entityId: id,
   });
+  revalidateTag(TAG_PLAYERS);
   revalidatePath("/", "layout");
   return ok({ id });
 }

@@ -6,9 +6,10 @@ import { FooterBlock } from "@/components/layout/footer-block";
 import { SpectatorCamTransition } from "@/components/scenes/SpectatorCamTransition";
 import { isLocale } from "@/lib/i18n/routing";
 import { getSiteConfig } from "@/lib/site-config";
-import { getSessionUser } from "@/lib/auth/session";
-import { readCartCount } from "@/lib/cart/detail";
 
+// Layout intentionally avoids reading cookies / per-user data so its render
+// output can be cached at Vercel's CDN. The TopBar fills in auth + cart
+// state on the client via /api/me.
 export default async function PublicLayout({
   children,
   params,
@@ -20,19 +21,11 @@ export default async function PublicLayout({
   if (!isLocale(locale)) notFound();
   setRequestLocale(locale);
 
-  const [discordUrl, sessionUser, cartCount] = await Promise.all([
-    getSiteConfig("socials.discord_url"),
-    getSessionUser(),
-    readCartCount(),
-  ]);
+  const discordUrl = await getSiteConfig("socials.discord_url");
 
   return (
     <>
-      <TopBar
-        discordUrl={discordUrl}
-        signedIn={Boolean(sessionUser)}
-        cartCount={cartCount}
-      />
+      <TopBar discordUrl={discordUrl} />
       <SpectatorCamTransition />
       {children}
       <FooterBlock locale={locale} />

@@ -82,6 +82,7 @@ export function ProductPurchase({
       if (res.success) {
         setDone(true);
         window.setTimeout(() => setDone(false), 1800);
+        window.dispatchEvent(new CustomEvent("cart-changed"));
       } else {
         setError(res.error || labels.addError);
       }

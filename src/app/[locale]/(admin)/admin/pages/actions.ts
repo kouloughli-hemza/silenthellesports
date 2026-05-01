@@ -1,10 +1,11 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { z } from "zod";
 import { requireAdmin } from "@/lib/admin/guard";
 import { recordAudit } from "@/lib/admin/audit";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { TAG_PAGES } from "@/lib/data/pages";
 import { fail, ok, type Result } from "@/types/domain";
 
 const Translated = z.object({ en: z.string(), ar: z.string() });
@@ -42,6 +43,7 @@ export async function createPageAction(input: PageInput): Promise<Result<{ id: s
     entityId: data.id,
     after: { slug: parsed.data.slug },
   });
+  revalidateTag(TAG_PAGES);
   revalidatePath("/", "layout");
   return ok({ id: data.id });
 }
@@ -72,6 +74,7 @@ export async function updatePageAction(
     entityId: id,
     after: { slug: parsed.data.slug, is_published: parsed.data.is_published },
   });
+  revalidateTag(TAG_PAGES);
   revalidatePath("/", "layout");
   return ok({ id });
 }
@@ -88,6 +91,7 @@ export async function deletePageAction(id: string): Promise<Result<{ id: string 
     entityType: "pages",
     entityId: id,
   });
+  revalidateTag(TAG_PAGES);
   revalidatePath("/", "layout");
   return ok({ id });
 }

@@ -1,10 +1,11 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { z } from "zod";
 import { requireAdmin } from "@/lib/admin/guard";
 import { recordAudit } from "@/lib/admin/audit";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { TAG_MILESTONES } from "@/lib/data/team";
 import { fail, ok, type Result } from "@/types/domain";
 
 const Translated = z.object({ en: z.string().min(1), ar: z.string().min(1) });
@@ -52,6 +53,7 @@ export async function createMilestoneAction(
     entityId: data.id,
     after: { category: parsed.data.category },
   });
+  revalidateTag(TAG_MILESTONES);
   revalidatePath("/", "layout");
   return ok({ id: data.id });
 }
@@ -78,6 +80,7 @@ export async function updateMilestoneAction(
     entityId: id,
     after: { category: parsed.data.category },
   });
+  revalidateTag(TAG_MILESTONES);
   revalidatePath("/", "layout");
   return ok({ id });
 }
@@ -94,6 +97,7 @@ export async function deleteMilestoneAction(id: string): Promise<Result<{ id: st
     entityType: "team_milestones",
     entityId: id,
   });
+  revalidateTag(TAG_MILESTONES);
   revalidatePath("/", "layout");
   return ok({ id });
 }

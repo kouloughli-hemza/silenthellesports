@@ -1,10 +1,11 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { z } from "zod";
 import { requireAdmin } from "@/lib/admin/guard";
 import { recordAudit } from "@/lib/admin/audit";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { TAG_EVENTS } from "@/lib/data/events";
 import { fail, ok, type Result } from "@/types/domain";
 
 const Translated = z.object({ en: z.string(), ar: z.string() });
@@ -64,6 +65,7 @@ export async function createEventAction(input: EventInput): Promise<Result<{ id:
     entityId: data.id,
     after: { slug: parsed.data.slug },
   });
+  revalidateTag(TAG_EVENTS);
   revalidatePath("/", "layout");
   return ok({ id: data.id });
 }
@@ -96,6 +98,7 @@ export async function updateEventAction(
     entityId: id,
     after: { slug: parsed.data.slug, status: parsed.data.status },
   });
+  revalidateTag(TAG_EVENTS);
   revalidatePath("/", "layout");
   return ok({ id });
 }
@@ -112,6 +115,7 @@ export async function deleteEventAction(id: string): Promise<Result<{ id: string
     entityType: "events",
     entityId: id,
   });
+  revalidateTag(TAG_EVENTS);
   revalidatePath("/", "layout");
   return ok({ id });
 }
@@ -148,6 +152,7 @@ export async function updateSignupPaymentAction(
     entityId: id,
     after: { payment_status: parsed.data },
   });
+  revalidateTag(TAG_EVENTS);
   revalidatePath("/", "layout");
   return ok({ id });
 }
@@ -174,6 +179,7 @@ export async function updateSignupStatusAction(
     entityId: id,
     after: { status: parsed.data },
   });
+  revalidateTag(TAG_EVENTS);
   revalidatePath("/", "layout");
   return ok({ id });
 }
@@ -190,6 +196,7 @@ export async function deleteSignupAction(id: string): Promise<Result<{ id: strin
     entityType: "event_signups",
     entityId: id,
   });
+  revalidateTag(TAG_EVENTS);
   revalidatePath("/", "layout");
   return ok({ id });
 }
@@ -228,6 +235,7 @@ export async function updateSignupSquadAction(
     entityId: id,
     after: { count: parsed.data.length },
   });
+  revalidateTag(TAG_EVENTS);
   revalidatePath("/", "layout");
   return ok({ id });
 }

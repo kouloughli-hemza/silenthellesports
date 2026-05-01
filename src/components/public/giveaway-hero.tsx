@@ -3,15 +3,9 @@ import { EmberField, PlaceholderImage } from "@/components/brand";
 import { GiveawayBurst } from "@/components/scenes/GiveawayBurst";
 import { GiveawayCountdown } from "@/components/public/giveaway-countdown";
 import { GiveawayEntryForm } from "@/components/public/giveaway-entry-form";
-import { getSessionUser } from "@/lib/auth/session";
 import { getActiveGiveaway, getGiveawayEntryCount } from "@/lib/data/giveaways";
-import { getExistingEntryForCurrentUser } from "@/lib/giveaway/entries";
 import { parseEntryMethods } from "@/lib/utils/giveaway";
-import {
-  pickTranslation,
-  type GiveawayEntryMethodType,
-  type Locale,
-} from "@/types/domain";
+import { pickTranslation, type Locale } from "@/types/domain";
 
 interface GiveawayHeroProps {
   locale: Locale;
@@ -22,6 +16,10 @@ interface RuleItem {
   s: string;
 }
 
+// Session-agnostic by design so the home page stays fully cacheable.
+// The entry form starts blank for everyone; if the user has already entered,
+// the server action surfaces it on submit. Power users lose pre-filled email,
+// but every visitor lands on a CDN-cached page. Worth the trade.
 export async function GiveawayHero({ locale }: GiveawayHeroProps) {
   const giveaway = await getActiveGiveaway();
   if (!giveaway) return null;
@@ -30,17 +28,6 @@ export async function GiveawayHero({ locale }: GiveawayHeroProps) {
 
   const entries = await getGiveawayEntryCount(giveaway.id);
   const entryMethods = parseEntryMethods(giveaway.entry_methods);
-  const session = await getSessionUser();
-  const existingEntry = await getExistingEntryForCurrentUser(giveaway.id);
-  const initialCompletedTypes: GiveawayEntryMethodType[] = existingEntry
-    ? existingEntry.completedMethods.filter(
-        (m): m is GiveawayEntryMethodType =>
-          m === "follow_x" ||
-          m === "join_discord" ||
-          m === "subscribe_youtube" ||
-          m === "share",
-      )
-    : [];
   const titleText = pickTranslation(giveaway.title, locale);
   const prizeText = pickTranslation(giveaway.prize_description, locale);
   const dropNumber = giveaway.drop_number ?? 1;
@@ -184,10 +171,10 @@ export async function GiveawayHero({ locale }: GiveawayHeroProps) {
                 methods={entryMethods}
                 locale={locale}
                 initialPool={entries}
-                defaultEmail={session?.email ?? null}
-                defaultDiscordTag={existingEntry?.discordTag ?? null}
-                initialCompleted={initialCompletedTypes}
-                initialEntryCount={existingEntry?.entryCount ?? 0}
+                defaultEmail={null}
+                defaultDiscordTag={null}
+                initialCompleted={[]}
+                initialEntryCount={0}
                 i18n={{
                   live: t("live"),
                   yours: t("yours"),

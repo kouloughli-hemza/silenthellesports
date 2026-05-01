@@ -1,10 +1,12 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { z } from "zod";
 import { requireAdmin } from "@/lib/admin/guard";
 import { recordAudit } from "@/lib/admin/audit";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { TAG_TACTICS } from "@/lib/data/team";
+import { tagForSiteConfigKey } from "@/lib/site-config";
 import { fail, ok, type Result } from "@/types/domain";
 
 const Translated = z.object({ en: z.string().min(1), ar: z.string().min(1) });
@@ -51,6 +53,7 @@ export async function createTacticBoardAction(
     entityId: data.id,
     after: { map_name: parsed.data.map_name },
   });
+  revalidateTag(TAG_TACTICS);
   revalidatePath("/", "layout");
   return ok({ id: data.id });
 }
@@ -77,6 +80,7 @@ export async function updateTacticBoardAction(
     entityId: id,
     after: { map_name: parsed.data.map_name },
   });
+  revalidateTag(TAG_TACTICS);
   revalidatePath("/", "layout");
   return ok({ id });
 }
@@ -93,6 +97,7 @@ export async function deleteTacticBoardAction(id: string): Promise<Result<{ id: 
     entityType: "tactic_boards",
     entityId: id,
   });
+  revalidateTag(TAG_TACTICS);
   revalidatePath("/", "layout");
   return ok({ id });
 }
@@ -122,6 +127,7 @@ export async function setTacticsEnabledAction(
     entityId: "tactics.enabled",
     after: { enabled },
   });
+  revalidateTag(tagForSiteConfigKey("tactics.enabled"));
   revalidatePath("/", "layout");
   return ok({ enabled });
 }

@@ -5,9 +5,7 @@ import {
   countUpcomingEvents,
   getEventSignupCount,
   getUpcomingEvents,
-  getUserActiveSignupEventIds,
 } from "@/lib/data/events";
-import { getSessionUser } from "@/lib/auth/session";
 import { EventCard } from "@/components/public/event-card";
 import type { Locale } from "@/types/domain";
 
@@ -15,6 +13,9 @@ interface EventsPreviewProps {
   locale: Locale;
 }
 
+// Home preview is intentionally session-agnostic so the page can be served
+// from the CDN cache. The "already signed up" badge surfaces on the dedicated
+// /events listing and detail pages, which are dynamic by necessity.
 export async function EventsPreview({ locale }: EventsPreviewProps) {
   const t = await getTranslations({ locale, namespace: "events" });
   const isAr = locale === "ar";
@@ -26,14 +27,6 @@ export async function EventsPreview({ locale }: EventsPreviewProps) {
 
   // Resolve signup counts for both cards in parallel.
   const signups = await Promise.all(events.map((e) => getEventSignupCount(e.id)));
-
-  const sessionUser = await getSessionUser();
-  const signedEventIds = sessionUser
-    ? await getUserActiveSignupEventIds(
-        sessionUser.id,
-        events.map((e) => e.id),
-      )
-    : new Set<string>();
 
   return (
     <section
@@ -71,7 +64,6 @@ export async function EventsPreview({ locale }: EventsPreviewProps) {
                 signupCount={signups[i] ?? 0}
                 locale={locale}
                 variant="upcoming"
-                alreadySigned={signedEventIds.has(event.id)}
               />
             ))}
           </div>

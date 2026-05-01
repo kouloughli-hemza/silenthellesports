@@ -1,10 +1,11 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { z } from "zod";
 import { requireAdmin } from "@/lib/admin/guard";
 import { recordAudit } from "@/lib/admin/audit";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { tagForSiteConfigKey, TAG_SITE_CONFIG_ALL } from "@/lib/site-config";
 import { fail, ok, type Result } from "@/types/domain";
 
 const Translated = z.object({ en: z.string(), ar: z.string() });
@@ -90,7 +91,10 @@ export async function saveSiteConfigAction(
     after: { keys: rows.map((r) => r.key) },
   });
 
-  // Revalidate everything that consumes site_config
+  // Per-key cache tags evict only the affected entries; the catch-all tag is
+  // a safety net for components that snapshot multiple keys together.
+  for (const row of rows) revalidateTag(tagForSiteConfigKey(row.key));
+  revalidateTag(TAG_SITE_CONFIG_ALL);
   revalidatePath("/", "layout");
   return ok({ saved: rows.length });
 }

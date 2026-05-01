@@ -23,11 +23,14 @@ const ITEMS: NavItem[] = [
 
 interface TopBarProps {
   discordUrl: string;
-  signedIn: boolean;
-  cartCount?: number;
 }
 
-export function TopBar({ discordUrl, signedIn, cartCount = 0 }: TopBarProps) {
+// Per-user state (auth + cart count) is fetched client-side from /api/me so
+// the surrounding layout can stay fully cacheable on Vercel's CDN. The bar
+// renders with neutral defaults (signed-out, cart=0) for ~1 frame, then the
+// fetched values fill in. cart-changed and auth-changed events trigger a
+// re-fetch when the user mutates their cart or signs in/out elsewhere.
+export function TopBar({ discordUrl }: TopBarProps) {
   const t = useTranslations("nav");
   const ctaT = useTranslations("cta");
   const authT = useTranslations("auth");
@@ -35,6 +38,34 @@ export function TopBar({ discordUrl, signedIn, cartCount = 0 }: TopBarProps) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const [signingOut, startSignOut] = useTransition();
+  const [signedIn, setSignedIn] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function refresh() {
+      try {
+        const res = await fetch("/api/me", { cache: "no-store" });
+        if (!res.ok || cancelled) return;
+        const data = (await res.json()) as { signedIn?: boolean; cartCount?: number };
+        if (cancelled) return;
+        setSignedIn(Boolean(data.signedIn));
+        setCartCount(Number.isFinite(data.cartCount) ? Number(data.cartCount) : 0);
+      } catch {
+        // Network failure → keep defaults; user can still navigate.
+      }
+    }
+    refresh();
+    const onCart = () => refresh();
+    const onAuth = () => refresh();
+    window.addEventListener("cart-changed", onCart);
+    window.addEventListener("auth-changed", onAuth);
+    return () => {
+      cancelled = true;
+      window.removeEventListener("cart-changed", onCart);
+      window.removeEventListener("auth-changed", onAuth);
+    };
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -258,6 +289,7 @@ export function TopBar({ discordUrl, signedIn, cartCount = 0 }: TopBarProps) {
                     onClick={() =>
                       startSignOut(async () => {
                         await signOutAction();
+                        window.dispatchEvent(new CustomEvent("auth-changed"));
                       })
                     }
                     className="font-mono text-[11px] tracking-[0.25em] uppercase interactive"

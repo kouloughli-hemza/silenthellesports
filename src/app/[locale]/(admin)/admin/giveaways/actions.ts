@@ -1,10 +1,11 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { z } from "zod";
 import { requireAdmin } from "@/lib/admin/guard";
 import { recordAudit } from "@/lib/admin/audit";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { TAG_GIVEAWAYS } from "@/lib/data/giveaways";
 import { fail, ok, type Result } from "@/types/domain";
 const Translated = z.object({ en: z.string(), ar: z.string() });
 const TranslatedRequired = z.object({ en: z.string().min(1), ar: z.string().min(1) });
@@ -53,6 +54,7 @@ export async function createGiveawayAction(input: GiveawayInput): Promise<Result
     entityId: data.id,
     after: { slug: parsed.data.slug },
   });
+  revalidateTag(TAG_GIVEAWAYS);
   revalidatePath("/", "layout");
   return ok({ id: data.id });
 }
@@ -79,6 +81,7 @@ export async function updateGiveawayAction(
     entityId: id,
     after: { slug: parsed.data.slug, status: parsed.data.status },
   });
+  revalidateTag(TAG_GIVEAWAYS);
   revalidatePath("/", "layout");
   return ok({ id });
 }
@@ -95,6 +98,7 @@ export async function deleteGiveawayAction(id: string): Promise<Result<{ id: str
     entityType: "giveaways",
     entityId: id,
   });
+  revalidateTag(TAG_GIVEAWAYS);
   revalidatePath("/", "layout");
   return ok({ id });
 }
@@ -136,6 +140,7 @@ export async function drawWinnerAction(
     entityId: id,
     after: { winner_email: winner.email, entry_id: winner.id },
   });
+  revalidateTag(TAG_GIVEAWAYS);
   revalidatePath("/", "layout");
   return ok({ winnerEmail: winner.email });
 }

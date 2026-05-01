@@ -3,6 +3,7 @@
 // Phase 1 ships defaults inline; Phase 4 hooks them up to admin editing.
 // =============================================================================
 
+import { unstable_cache as cache } from "next/cache";
 import { z } from "zod";
 import { createPublicClient } from "@/lib/supabase/public";
 import type { Translated } from "@/types/database";
@@ -68,23 +69,35 @@ const DEFAULTS: { [K in ConfigKey]: ConfigValue<K> } = {
   "tactics.enabled": true,
 };
 
+// Tag every config read so admin updates can revalidateTag(`site-config:${key}`)
+// to evict only the affected key. Bumping a single key won't invalidate every
+// component on the page that reads other keys.
+export const tagForSiteConfigKey = (key: string) => `site-config:${key}`;
+export const TAG_SITE_CONFIG_ALL = "site-config";
+
 export async function getSiteConfig<K extends ConfigKey>(key: K): Promise<ConfigValue<K>> {
-  try {
-    const supabase = createPublicClient();
-    const { data, error } = await supabase
-      .from("site_config")
-      .select("value")
-      .eq("key", key as string)
-      .maybeSingle<{ value: unknown }>();
+  return cache(
+    async () => {
+      try {
+        const supabase = createPublicClient();
+        const { data, error } = await supabase
+          .from("site_config")
+          .select("value")
+          .eq("key", key as string)
+          .maybeSingle<{ value: unknown }>();
 
-    if (error || !data) return DEFAULTS[key];
+        if (error || !data) return DEFAULTS[key];
 
-    const schema = ConfigSchemas[key];
-    const parsed = schema.safeParse(data.value);
-    return parsed.success ? (parsed.data as ConfigValue<K>) : DEFAULTS[key];
-  } catch {
-    return DEFAULTS[key];
-  }
+        const schema = ConfigSchemas[key];
+        const parsed = schema.safeParse(data.value);
+        return parsed.success ? (parsed.data as ConfigValue<K>) : DEFAULTS[key];
+      } catch {
+        return DEFAULTS[key];
+      }
+    },
+    ["site-config", key as string],
+    { revalidate: 60, tags: [tagForSiteConfigKey(key as string), TAG_SITE_CONFIG_ALL] },
+  )();
 }
 
 export type { Translated, ConfigKey };
