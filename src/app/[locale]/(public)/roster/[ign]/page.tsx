@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 
-import { PlaceholderImage, SectionHeading } from "@/components/brand";
+import { PlaceholderImage, PlayerPortrait, SectionHeading } from "@/components/brand";
 import { Link } from "@/lib/i18n/routing";
 import { isLocale, type Locale } from "@/lib/i18n/routing";
 import {
@@ -131,9 +131,13 @@ export default async function PlayerDetailPage({
             className="card-bite notch overflow-hidden"
             style={{ background: "var(--ash-1)" }}
           >
-            <PlaceholderImage
-              label={`OPERATIVE · ${player.ign}`}
+            <PlayerPortrait
+              src={player.photo_url}
+              alt={player.ign}
+              fallbackLabel={`OPERATIVE · ${player.ign}`}
               aspect="4/5"
+              sizes="(max-width: 768px) 90vw, 420px"
+              priority
             />
           </div>
 

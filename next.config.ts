@@ -9,6 +9,15 @@ const config: NextConfig = {
   // freezing the hero animation in dev. Production doesn't run StrictMode.
   reactStrictMode: false,
   poweredByHeader: false,
+  experimental: {
+    serverActions: {
+      // Default is 1 MB — too small for player portraits / event banners /
+      // product photos uploaded straight from a phone. Raise to 8 MB so
+      // typical mobile JPEGs (4–6 MB) go through. Action handlers that touch
+      // user-supplied bytes still need to validate type/size on their end.
+      bodySizeLimit: "8mb",
+    },
+  },
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "*.supabase.co" },

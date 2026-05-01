@@ -1,5 +1,5 @@
 import { getTranslations } from "next-intl/server";
-import { PlaceholderImage, SectionHeading } from "@/components/brand";
+import { PlayerPortrait, SectionHeading } from "@/components/brand";
 import { RosterParachuteDrop } from "@/components/scenes/RosterParachuteDrop";
 import { Link } from "@/lib/i18n/routing";
 import { getActivePlayers } from "@/lib/data/players";
@@ -118,10 +118,13 @@ function PlayerCard({ player, index, locale }: PlayerCardProps) {
       aria-label={player.ign}
     >
       <div className="relative">
-        <PlaceholderImage
-          label={`PLAYER ${String(index + 1).padStart(2, "0")}`}
+        <PlayerPortrait
+          src={player.photo_url}
+          alt={player.ign}
+          fallbackLabel={`PLAYER ${String(index + 1).padStart(2, "0")}`}
           aspect="4/5"
           grayscale
+          sizes="280px"
         />
         <div
           className="absolute top-3 left-3 px-2 py-1 font-mono text-[10px] tracking-[0.25em] uppercase"

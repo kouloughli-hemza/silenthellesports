@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 
-import { PlaceholderImage, SectionHeading } from "@/components/brand";
+import { PlayerPortrait, SectionHeading } from "@/components/brand";
 import { Link } from "@/lib/i18n/routing";
 import { isLocale, type Locale } from "@/lib/i18n/routing";
 import { getActivePlayers, getStaff } from "@/lib/data/players";
@@ -163,10 +163,13 @@ function PlayerGridCard({
       aria-label={`${callsignLabel} ${player.ign}`}
     >
       <div className="relative">
-        <PlaceholderImage
-          label={`${callsignLabel} ${indexLabel}`}
+        <PlayerPortrait
+          src={player.photo_url}
+          alt={player.ign}
+          fallbackLabel={`${callsignLabel} ${indexLabel}`}
           aspect="4/5"
           grayscale
+          sizes="(max-width: 768px) 50vw, 320px"
         />
         <div
           className="absolute top-3 left-3 px-2 py-1 font-mono text-[10px] tracking-[0.25em] uppercase"
