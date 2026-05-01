@@ -4,6 +4,28 @@ import { useId, useRef, useState, useTransition } from "react";
 import { uploadImageAction } from "@/lib/admin/upload";
 import type { UploadBucket } from "@/lib/admin/upload-types";
 
+// Keep in sync with MAX_BYTES in src/lib/admin/upload.ts and the
+// experimental.serverActions.bodySizeLimit in next.config.ts.
+// We surface this both as a hint in the dropzone and as a hard pre-flight
+// check so the admin gets an instant, friendly error instead of a generic
+// server-action body-size crash.
+const MAX_BYTES = 5 * 1024 * 1024;
+const MAX_LABEL = "5 MB";
+const ACCEPTED_LABEL = "PNG · JPG · WEBP · AVIF · GIF";
+
+function describeBytes(n: number): string {
+  if (n >= 1024 * 1024) return `${(n / (1024 * 1024)).toFixed(1)} MB`;
+  return `${Math.max(1, Math.round(n / 1024))} KB`;
+}
+
+function checkFile(file: File): string | null {
+  if (file.size === 0) return "That file is empty.";
+  if (file.size > MAX_BYTES) {
+    return `Image is ${describeBytes(file.size)} — max ${MAX_LABEL}. Resize and try again.`;
+  }
+  return null;
+}
+
 interface SingleProps {
   value: string | null;
   onChange: (url: string | null) => void;
@@ -24,6 +46,12 @@ export function ImageUpload({ value, onChange, bucket, label }: SingleProps) {
   function onFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    const sizeErr = checkFile(file);
+    if (sizeErr) {
+      setError(sizeErr);
+      if (inputRef.current) inputRef.current.value = "";
+      return;
+    }
     setError(null);
     const fd = new FormData();
     fd.set("file", file);
@@ -135,6 +163,16 @@ export function ImageUploadList({ value, onChange, bucket, max = 10, label }: Li
   function onFiles(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? []).slice(0, remaining);
     if (files.length === 0) return;
+    // Pre-flight: reject the whole batch if any single file is over the
+    // limit. Cheap to check, much friendlier than half-uploading then dying.
+    for (const f of files) {
+      const sizeErr = checkFile(f);
+      if (sizeErr) {
+        setError(`${f.name}: ${sizeErr}`);
+        if (inputRef.current) inputRef.current.value = "";
+        return;
+      }
+    }
     setError(null);
     startTransition(async () => {
       const uploaded: string[] = [];
@@ -279,7 +317,7 @@ function DropZone({ onPick, pending, multiple = false }: { onPick: () => void; p
       type="button"
       onClick={onPick}
       disabled={pending}
-      className="w-full font-mono text-[11px] tracking-[0.2em] uppercase"
+      className="w-full font-mono tracking-[0.2em] uppercase"
       style={{
         background: "var(--ash-3)",
         border: "1px dashed rgba(230,0,19,0.4)",
@@ -289,11 +327,21 @@ function DropZone({ onPick, pending, multiple = false }: { onPick: () => void; p
         transition: "border-color 150ms",
       }}
     >
-      {pending
-        ? "UPLOADING…"
-        : multiple
-          ? "+ CLICK TO UPLOAD IMAGES"
-          : "+ CLICK TO UPLOAD IMAGE"}
+      <div className="text-[11px]">
+        {pending
+          ? "UPLOADING…"
+          : multiple
+            ? "+ CLICK TO UPLOAD IMAGES"
+            : "+ CLICK TO UPLOAD IMAGE"}
+      </div>
+      {!pending ? (
+        <div
+          className="mt-2 text-[9px] tracking-[0.15em]"
+          style={{ color: "rgba(245,240,232,0.45)" }}
+        >
+          {ACCEPTED_LABEL} · MAX {MAX_LABEL}
+        </div>
+      ) : null}
     </button>
   );
 }
