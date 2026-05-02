@@ -47,10 +47,12 @@ export interface PlayerStats {
 }
 
 // ----- player socials shape (stored in players.socials jsonb) -----
+// Existing rows may carry legacy keys (twitch / youtube / x); we read and
+// write only these three. Orphaned keys are left in the DB until the row is
+// next saved, then discarded.
 export interface PlayerSocials {
-  twitch?: string;
-  youtube?: string;
-  x?: string;
+  tiktok?: string;
+  liquipedia?: string;
   instagram?: string;
 }
 

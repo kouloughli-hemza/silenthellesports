@@ -23,9 +23,8 @@ const StatsSchema = z
 
 const SocialsSchema = z
   .object({
-    twitch: z.string().optional(),
-    youtube: z.string().optional(),
-    x: z.string().optional(),
+    tiktok: z.string().optional(),
+    liquipedia: z.string().optional(),
     instagram: z.string().optional(),
   })
   .partial();

@@ -371,13 +371,11 @@ export function parseInfobox(wikitext: string): InfoboxData {
     if (stripped.length > 0) result.location = stripped;
   }
 
-  const twitch = named["twitch"];
-  const youtube = named["youtube"];
-  const x = named["twitter"] ?? named["x"];
+  // We only surface tiktok / liquipedia / instagram on the public profile,
+  // so other handles parsed from the wikitext are intentionally dropped.
+  const tiktok = named["tiktok"];
   const instagram = named["instagram"];
-  if (twitch) socials.twitch = twitch.trim();
-  if (youtube) socials.youtube = youtube.trim();
-  if (x) socials.x = x.trim();
+  if (tiktok) socials.tiktok = tiktok.trim();
   if (instagram) socials.instagram = instagram.trim();
 
   return result;

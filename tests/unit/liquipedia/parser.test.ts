@@ -79,8 +79,10 @@ describe("parseInfobox", () => {
     expect(result.foundedDate).toBe("2023-11-20");
     expect(result.region).toBe("MENA");
     expect(result.location).toContain("Algeria");
-    expect(result.socials.x).toBe("silenthellgg");
-    expect(result.socials.youtube).toBe("silenthellesports");
+    // Player socials are intentionally limited to tiktok / liquipedia /
+    // instagram now; legacy fixture handles for x and youtube are dropped.
+    expect(result.socials.instagram).toBeUndefined();
+    expect(result.socials.tiktok).toBeUndefined();
   });
 
   it("returns empty socials and undefined fields when no infobox is present", () => {

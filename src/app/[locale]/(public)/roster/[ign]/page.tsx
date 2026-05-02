@@ -298,22 +298,19 @@ export default async function PlayerDetailPage({
             <span className="section-label">{t("socials")}</span>
           </div>
           <ul className="flex flex-wrap gap-3">
-            {socials.twitch ? (
+            {socials.tiktok ? (
               <SocialLink
-                href={socials.twitch}
-                label="Twitch"
-                icon={<TwitchIcon />}
+                href={socials.tiktok}
+                label="TikTok"
+                icon={<TikTokIcon />}
               />
             ) : null}
-            {socials.youtube ? (
+            {socials.liquipedia ? (
               <SocialLink
-                href={socials.youtube}
-                label="YouTube"
-                icon={<YouTubeIcon />}
+                href={socials.liquipedia}
+                label="Liquipedia"
+                icon={<LiquipediaIcon />}
               />
-            ) : null}
-            {socials.x ? (
-              <SocialLink href={socials.x} label="X" icon={<XIcon />} />
             ) : null}
             {socials.instagram ? (
               <SocialLink
@@ -500,15 +497,14 @@ function readSocials(value: unknown): PlayerSocials {
   const pickStr = (v: unknown): string | undefined =>
     typeof v === "string" && v.trim().length > 0 ? v : undefined;
   return {
-    twitch: pickStr(obj.twitch),
-    youtube: pickStr(obj.youtube),
-    x: pickStr(obj.x),
+    tiktok: pickStr(obj.tiktok),
+    liquipedia: pickStr(obj.liquipedia),
     instagram: pickStr(obj.instagram),
   };
 }
 
 function hasAnySocial(s: PlayerSocials): boolean {
-  return Boolean(s.twitch || s.youtube || s.x || s.instagram);
+  return Boolean(s.tiktok || s.liquipedia || s.instagram);
 }
 
 function formatKd(value: number | undefined, locale: Locale, fallback: string): string {
@@ -539,26 +535,28 @@ function formatInt(value: number | undefined, locale: Locale, fallback: string):
 // Inline social icons
 // -----------------------------------------------------------------------------
 
-function TwitchIcon() {
+function TikTokIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-      <path d="M4 2 2 6v14h5v3h3l3-3h4l5-5V2zm16 11-3 3h-5l-3 3v-3H6V4h14zM11 8h2v5h-2zm5 0h2v5h-2z" />
+      <path d="M19.5 6.5c-1.6 0-3-.6-4-1.7-.6-.7-1-1.6-1.1-2.6V2h-3.3v13.4c0 1.1-.5 2.2-1.4 2.9-.7.5-1.5.8-2.4.8-2.1 0-3.8-1.7-3.8-3.7s1.7-3.7 3.8-3.7c.4 0 .8.1 1.1.2V8.5c-.4-.1-.7-.1-1.1-.1C3.8 8.4 1 11.2 1 14.7s2.8 6.3 6.3 6.3c1.4 0 2.8-.5 3.9-1.3 1.5-1.1 2.5-2.9 2.5-4.9V8.6c1.4 1 3.1 1.6 4.8 1.6V7c-.1 0-.2 0-.3-.1.1-.1.2-.3.3-.4z" />
     </svg>
   );
 }
 
-function YouTubeIcon() {
+// Liquipedia uses a stylised "L" wordmark; in this small footprint we use a
+// simple monogram tile so the affordance reads as a button regardless of
+// whether visitors recognise the brand.
+function LiquipediaIcon() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-      <path d="M23 7.5a3 3 0 0 0-2.1-2.1C19 5 12 5 12 5s-7 0-8.9.4A3 3 0 0 0 1 7.5 32 32 0 0 0 .5 12 32 32 0 0 0 1 16.5a3 3 0 0 0 2.1 2.1C5 19 12 19 12 19s7 0 8.9-.4a3 3 0 0 0 2.1-2.1A32 32 0 0 0 23.5 12 32 32 0 0 0 23 7.5zM10 15.5v-7l6 3.5z" />
-    </svg>
-  );
-}
-
-function XIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-      <path d="M18.244 2H21l-6.52 7.452L22 22h-6.828l-4.99-6.51L4.4 22H1.64l6.97-7.96L1.5 2h6.95l4.51 5.96zm-1.196 18h1.832L7.06 4h-1.96z" />
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <rect x="2.5" y="2.5" width="19" height="19" rx="2" stroke="currentColor" strokeWidth="1.6" />
+      <path
+        d="M8 6.5v11h8"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="square"
+        strokeLinejoin="miter"
+      />
     </svg>
   );
 }

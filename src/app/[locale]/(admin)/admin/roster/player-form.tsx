@@ -28,7 +28,7 @@ export function PlayerForm({ mode, id, locale, initial }: PlayerFormProps) {
   function setStat(field: "kd" | "headshot" | "matches" | "chicken_dinners", value: number | undefined) {
     setState((s) => ({ ...s, stats: { ...s.stats, [field]: value } }));
   }
-  function setSocial(field: "twitch" | "youtube" | "x" | "instagram", value: string) {
+  function setSocial(field: "tiktok" | "liquipedia" | "instagram", value: string) {
     setState((s) => ({
       ...s,
       socials: { ...s.socials, [field]: value === "" ? undefined : value },
@@ -191,31 +191,27 @@ export function PlayerForm({ mode, id, locale, initial }: PlayerFormProps) {
       </Section>
 
       <Section title="SOCIALS">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <Field label="Twitch">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <Field label="TikTok">
             <input
               className="field"
-              value={state.socials.twitch ?? ""}
-              onChange={(e) => setSocial("twitch", e.target.value)}
+              placeholder="https://www.tiktok.com/@handle"
+              value={state.socials.tiktok ?? ""}
+              onChange={(e) => setSocial("tiktok", e.target.value)}
             />
           </Field>
-          <Field label="YouTube">
+          <Field label="Liquipedia">
             <input
               className="field"
-              value={state.socials.youtube ?? ""}
-              onChange={(e) => setSocial("youtube", e.target.value)}
-            />
-          </Field>
-          <Field label="X / Twitter">
-            <input
-              className="field"
-              value={state.socials.x ?? ""}
-              onChange={(e) => setSocial("x", e.target.value)}
+              placeholder="https://liquipedia.net/pubgmobile/Player_Page"
+              value={state.socials.liquipedia ?? ""}
+              onChange={(e) => setSocial("liquipedia", e.target.value)}
             />
           </Field>
           <Field label="Instagram">
             <input
               className="field"
+              placeholder="https://www.instagram.com/handle"
               value={state.socials.instagram ?? ""}
               onChange={(e) => setSocial("instagram", e.target.value)}
             />
