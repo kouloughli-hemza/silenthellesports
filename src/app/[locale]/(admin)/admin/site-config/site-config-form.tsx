@@ -15,6 +15,7 @@ interface Initial {
   youtube: string;
   x: string;
   instagram: string;
+  tiktok: string;
   drop: number;
   giveDrop: number;
   sponsors: string[];
@@ -202,6 +203,14 @@ export function SiteConfigForm({ initial }: { initial: Initial }) {
               className="field"
               value={state.instagram}
               onChange={(e) => set("instagram", e.target.value)}
+            />
+          </Field>
+          <Field label="TikTok handle">
+            <input
+              className="field"
+              value={state.tiktok}
+              onChange={(e) => set("tiktok", e.target.value)}
+              placeholder="@silenthell.esports"
             />
           </Field>
         </div>

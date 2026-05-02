@@ -13,7 +13,7 @@ export default async function AdminSiteConfigPage({
   if (!isLocale(locale)) notFound();
   setRequestLocale(locale);
 
-  const [headline, tagline, stats, season, discordUrl, discordCount, twitch, youtube, x, instagram, drop, giveDrop, sponsors, fromWilaya, featuredEnds] =
+  const [headline, tagline, stats, season, discordUrl, discordCount, twitch, youtube, x, instagram, tiktok, drop, giveDrop, sponsors, fromWilaya, featuredEnds] =
     await Promise.all([
       getSiteConfig("hero.headline"),
       getSiteConfig("hero.tagline"),
@@ -25,6 +25,7 @@ export default async function AdminSiteConfigPage({
       getSiteConfig("socials.youtube_channel"),
       getSiteConfig("socials.x_handle"),
       getSiteConfig("socials.instagram_handle"),
+      getSiteConfig("socials.tiktok_handle"),
       getSiteConfig("store.current_drop"),
       getSiteConfig("giveaway.current_drop"),
       getSiteConfig("sponsors"),
@@ -65,6 +66,7 @@ export default async function AdminSiteConfigPage({
           youtube,
           x,
           instagram,
+          tiktok,
           drop,
           giveDrop,
           sponsors,
