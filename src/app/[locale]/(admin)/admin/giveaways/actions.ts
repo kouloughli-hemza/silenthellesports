@@ -32,7 +32,7 @@ const EntryMethodsForm = z.object({
   share: EntryMethodSlot,
 });
 
-export const ENTRY_METHOD_DEFAULT_LABELS = {
+const ENTRY_METHOD_DEFAULT_LABELS = {
   follow_tiktok: { en: "Follow on TikTok", ar: "تابعنا على تيك توك" },
   join_discord: { en: "Join Discord", ar: "انضم إلى ديسكورد" },
   subscribe_youtube: { en: "Subscribe on YouTube", ar: "اشترك في يوتيوب" },
