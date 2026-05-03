@@ -47,6 +47,15 @@ const SLOT_ORDER: readonly EntryMethodSlotKey[] = [
   "share",
 ];
 
+// revalidatePath("/", "layout") doesn't always reach locale-parameterized
+// routes ("/en", "/ar/giveaways"), so we hit each one explicitly.
+function revalidateGiveawayPaths() {
+  for (const locale of ["en", "ar"]) {
+    revalidatePath(`/${locale}`, "page");
+    revalidatePath(`/${locale}/giveaways`, "page");
+  }
+}
+
 function buildEntryMethodsArray(
   form: z.infer<typeof EntryMethodsForm>,
 ): Array<{ type: EntryMethodSlotKey; label: { en: string; ar: string }; url: string; weight: number }> {
@@ -100,7 +109,7 @@ export async function createGiveawayAction(input: GiveawayInput): Promise<Result
     after: { slug: parsed.data.slug },
   });
   revalidateTag(TAG_GIVEAWAYS);
-  revalidatePath("/", "layout");
+  revalidateGiveawayPaths();
   return ok({ id: data.id });
 }
 
@@ -132,7 +141,7 @@ export async function updateGiveawayAction(
     after: { slug: parsed.data.slug, status: parsed.data.status },
   });
   revalidateTag(TAG_GIVEAWAYS);
-  revalidatePath("/", "layout");
+  revalidateGiveawayPaths();
   return ok({ id });
 }
 
@@ -149,7 +158,7 @@ export async function deleteGiveawayAction(id: string): Promise<Result<{ id: str
     entityId: id,
   });
   revalidateTag(TAG_GIVEAWAYS);
-  revalidatePath("/", "layout");
+  revalidateGiveawayPaths();
   return ok({ id });
 }
 
