@@ -15,6 +15,7 @@ export async function Hero({ locale }: HeroProps) {
   const tagline = await getSiteConfig("hero.tagline");
   const stats = await getSiteConfig("hero.stats");
   const season = await getSiteConfig("hero.season");
+  const discordUrl = await getSiteConfig("socials.discord_url");
   const isAr = locale === "ar";
 
   const statRows = [
@@ -101,7 +102,14 @@ export async function Hero({ locale }: HeroProps) {
               {pickTranslation(tagline, locale)}
             </p>
             <div className="mt-4 flex flex-wrap gap-2 md:mt-10 md:gap-4">
-              <a className="btn-hell" href="#" aria-label={ctaT("joinDiscord")} style={{ padding: "10px 16px", fontSize: 13 }}>
+              <a
+                className="btn-hell"
+                href={discordUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={ctaT("joinDiscord")}
+                style={{ padding: "10px 16px", fontSize: 13 }}
+              >
                 <DiscordIcon />
                 {ctaT("joinDiscord")}
               </a>
@@ -219,7 +227,13 @@ export async function Hero({ locale }: HeroProps) {
           {pickTranslation(tagline, locale)}
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
-          <a className="btn-hell" href="#" aria-label={ctaT("joinDiscord")}>
+          <a
+            className="btn-hell"
+            href={discordUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={ctaT("joinDiscord")}
+          >
             <DiscordIcon />
             {ctaT("joinDiscord")}
           </a>
