@@ -276,41 +276,51 @@ function StaffCard({ person, index, locale }: StaffCardProps) {
     <Link
       href={`/roster/${encodeURIComponent(person.ign)}`}
       locale={locale}
-      className="card-bite notch-sm interactive group block p-4 focus-visible:outline-none"
+      className="card-bite notch interactive group block focus-visible:outline-none"
       style={{ background: "var(--ash-1)" }}
+      aria-label={`${person.role} ${person.ign}`}
     >
-      <div className="flex items-center justify-between">
-        <span
-          className="font-mono text-[10px] tracking-[0.25em] uppercase"
-          style={{ color: "rgba(245,240,232,0.5)" }}
+      <div className="relative">
+        <PlayerPortrait
+          src={person.photo_url}
+          alt={person.ign}
+          fallbackLabel={`STAFF ${indexLabel}`}
+          aspect="4/5"
+          grayscale
+          sizes="(max-width: 768px) 50vw, 320px"
+        />
+        <div
+          className="absolute top-3 left-3 px-2 py-1 font-mono text-[10px] tracking-[0.25em] uppercase"
+          style={{ background: "rgba(10,10,10,0.7)", color: "var(--bone)" }}
         >
           {indexLabel}
-        </span>
-        <span
-          className="font-mono text-[10px] tracking-[0.25em] uppercase"
-          style={{ background: "var(--hell-red)", color: "var(--bone)", padding: "2px 6px" }}
-        >
-          {person.role}
-        </span>
-      </div>
-      <div className="mt-4 flex items-end justify-between gap-3">
-        <div className="min-w-0">
-          <div className="font-display glitch-target truncate text-xl font-black italic uppercase">
-            {person.ign}
-          </div>
-          <div
-            className="mt-1 truncate text-xs"
-            style={{ color: "rgba(245,240,232,0.55)" }}
-          >
-            {person.real_name ?? "—"}
-          </div>
         </div>
         <div
-          className="text-2xl"
+          className="absolute top-3 right-3 text-2xl"
           style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.5))" }}
           aria-hidden
         >
           {flag}
+        </div>
+        <div
+          className="absolute bottom-3 left-3 px-2 py-1 font-mono text-[10px] tracking-[0.25em] uppercase"
+          style={{ background: "var(--hell-red)", color: "var(--bone)" }}
+        >
+          {person.role}
+        </div>
+      </div>
+      <div
+        className="border-t p-4"
+        style={{ borderColor: "rgba(230,0,19,0.25)" }}
+      >
+        <div className="font-display glitch-target truncate text-xl leading-none font-black italic uppercase">
+          {person.ign}
+        </div>
+        <div
+          className="mt-1 truncate text-xs"
+          style={{ color: "rgba(245,240,232,0.55)" }}
+        >
+          {person.real_name ?? "—"}
         </div>
       </div>
     </Link>
