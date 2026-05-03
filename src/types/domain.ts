@@ -58,7 +58,7 @@ export interface PlayerSocials {
 
 // ----- giveaway entry method shape -----
 export type GiveawayEntryMethodType =
-  | "follow_x"
+  | "follow_tiktok"
   | "join_discord"
   | "subscribe_youtube"
   | "share";

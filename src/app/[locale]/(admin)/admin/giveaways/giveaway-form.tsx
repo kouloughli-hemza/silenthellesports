@@ -39,8 +39,17 @@ export function GiveawayForm({ mode, id, locale, initial }: GiveawayFormProps) {
   function setT(field: "title" | "description" | "prize_description", lang: "en" | "ar", value: string) {
     setState((s) => ({ ...s, [field]: { ...s[field], [lang]: value } }));
   }
-  function setMethod(field: keyof GiveawayInput["entry_methods"], value: boolean) {
-    setState((s) => ({ ...s, entry_methods: { ...s.entry_methods, [field]: value } }));
+  function setMethodSlot(
+    type: keyof GiveawayInput["entry_methods"],
+    patch: Partial<GiveawayInput["entry_methods"][typeof type]>,
+  ) {
+    setState((s) => ({
+      ...s,
+      entry_methods: {
+        ...s.entry_methods,
+        [type]: { ...s.entry_methods[type], ...patch },
+      },
+    }));
   }
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -210,31 +219,52 @@ export function GiveawayForm({ mode, id, locale, initial }: GiveawayFormProps) {
       </Section>
 
       <Section title="ENTRY METHODS">
-        <div className="flex flex-wrap gap-6">
-          <label className="flex items-center gap-3 font-mono text-xs uppercase">
-            <input
-              type="checkbox"
-              checked={state.entry_methods.follow_required}
-              onChange={(e) => setMethod("follow_required", e.target.checked)}
-            />
-            <span style={{ color: "rgba(245,240,232,0.8)" }}>Follow required</span>
-          </label>
-          <label className="flex items-center gap-3 font-mono text-xs uppercase">
-            <input
-              type="checkbox"
-              checked={state.entry_methods.discord_required}
-              onChange={(e) => setMethod("discord_required", e.target.checked)}
-            />
-            <span style={{ color: "rgba(245,240,232,0.8)" }}>Discord required</span>
-          </label>
-          <label className="flex items-center gap-3 font-mono text-xs uppercase">
-            <input
-              type="checkbox"
-              checked={state.entry_methods.share_bonus}
-              onChange={(e) => setMethod("share_bonus", e.target.checked)}
-            />
-            <span style={{ color: "rgba(245,240,232,0.8)" }}>Share bonus</span>
-          </label>
+        <p
+          className="mb-4 font-mono text-[11px] tracking-[0.15em]"
+          style={{ color: "rgba(245,240,232,0.55)" }}
+        >
+          Each enabled row becomes one task on the public giveaway form.
+          Paste the link the user is sent to (your X profile, the Discord
+          invite, the YouTube channel, or anything for Share).
+        </p>
+        <div className="space-y-3">
+          {([
+            { key: "follow_tiktok", label: "Follow on TikTok", placeholder: "https://www.tiktok.com/@silenthell.esports" },
+            { key: "join_discord", label: "Join Discord", placeholder: "https://discord.gg/silenthell" },
+            { key: "subscribe_youtube", label: "Subscribe on YouTube", placeholder: "https://youtube.com/@SilentHellEsports" },
+            { key: "share", label: "Share with squad", placeholder: "https://silenthellesports.com/giveaways" },
+          ] as const).map(({ key, label, placeholder }) => {
+            const slot = state.entry_methods[key];
+            return (
+              <div
+                key={key}
+                className="grid items-center gap-3 md:grid-cols-[200px_1fr]"
+                style={{
+                  background: "var(--ash-3)",
+                  padding: 12,
+                  border: "1px solid rgba(245,240,232,0.06)",
+                }}
+              >
+                <label className="flex items-center gap-3 font-mono text-xs uppercase">
+                  <input
+                    type="checkbox"
+                    checked={slot.enabled}
+                    onChange={(e) => setMethodSlot(key, { enabled: e.target.checked })}
+                  />
+                  <span style={{ color: "rgba(245,240,232,0.85)" }}>{label}</span>
+                </label>
+                <input
+                  className="field"
+                  type="url"
+                  disabled={!slot.enabled}
+                  value={slot.url}
+                  onChange={(e) => setMethodSlot(key, { url: e.target.value })}
+                  placeholder={placeholder}
+                  style={{ opacity: slot.enabled ? 1 : 0.45 }}
+                />
+              </div>
+            );
+          })}
         </div>
       </Section>
 

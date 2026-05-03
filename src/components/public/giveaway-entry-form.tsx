@@ -62,7 +62,7 @@ export interface GiveawayEntryFormI18n {
 }
 
 const METHOD_ICONS: Record<GiveawayEntryMethodType, string> = {
-  follow_x: "𝕏",
+  follow_tiktok: "TT",
   join_discord: "DC",
   subscribe_youtube: "YT",
   share: "↗",
@@ -72,7 +72,7 @@ const StorageSchema = z.object({
   email: z.string().email().optional(),
   discordTag: z.string().optional(),
   completed: z.array(
-    z.enum(["follow_x", "join_discord", "subscribe_youtube", "share"]),
+    z.enum(["follow_tiktok", "join_discord", "subscribe_youtube", "share"]),
   ),
   entryCount: z.number().int().nonnegative().optional(),
 });

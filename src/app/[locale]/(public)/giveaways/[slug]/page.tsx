@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 
+import Image from "next/image";
 import { EmberField, PlaceholderImage } from "@/components/brand";
 import { CountdownTicker } from "@/components/public/countdown-ticker";
 import {
@@ -100,7 +101,7 @@ export default async function GiveawayDetailPage({
   const existingCompleted: GiveawayEntryMethodType[] = existingEntry
     ? existingEntry.completedMethods.filter(
         (m): m is GiveawayEntryMethodType =>
-          m === "follow_x" ||
+          m === "follow_tiktok" ||
           m === "join_discord" ||
           m === "subscribe_youtube" ||
           m === "share",
@@ -238,7 +239,17 @@ export default async function GiveawayDetailPage({
             </div>
 
             <div className="relative aspect-[4/3] w-full">
-              <PlaceholderImage label={prize || title} aspect="4/3" />
+              {giveaway.prize_image_url ? (
+                <Image
+                  src={giveaway.prize_image_url}
+                  alt={prize || title}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  style={{ objectFit: "cover" }}
+                />
+              ) : (
+                <PlaceholderImage label={prize || title} aspect="4/3" />
+              )}
               <div
                 className="absolute inset-0"
                 aria-hidden

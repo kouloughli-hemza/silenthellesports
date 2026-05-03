@@ -8,10 +8,44 @@ import type { GiveawayInput } from "../../actions";
 import { formatDateLong } from "@/lib/utils/format";
 import type { Locale } from "@/types/domain";
 
-interface Methods {
-  follow_required?: boolean;
-  discord_required?: boolean;
-  share_bonus?: boolean;
+type SlotKey = "follow_tiktok" | "join_discord" | "subscribe_youtube" | "share";
+
+function emptySlots(): GiveawayInput["entry_methods"] {
+  return {
+    follow_tiktok: { enabled: false, url: "" },
+    join_discord: { enabled: false, url: "" },
+    subscribe_youtube: { enabled: false, url: "" },
+    share: { enabled: false, url: "" },
+  };
+}
+
+// The DB column is jsonb. Old rows used { follow_required, discord_required,
+// share_bonus } booleans (no URLs ever stored — that broke entry). New rows
+// store the array form parseEntryMethods expects. Read whichever shape we
+// find and project to the form's 4-slot model.
+function readEntryMethodsFromDb(value: unknown): GiveawayInput["entry_methods"] {
+  const slots = emptySlots();
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      if (!item || typeof item !== "object") continue;
+      const o = item as Record<string, unknown>;
+      const type = o.type;
+      if (
+        type === "follow_tiktok" ||
+        type === "join_discord" ||
+        type === "subscribe_youtube" ||
+        type === "share"
+      ) {
+        slots[type as SlotKey] = {
+          enabled: true,
+          url: typeof o.url === "string" ? o.url : "",
+        };
+      }
+    }
+  }
+  // Old boolean shape can't be migrated automatically (no URLs ever stored);
+  // admin will see empty slots and re-fill them once.
+  return slots;
 }
 
 export default async function EditGiveawayPage({
@@ -30,8 +64,6 @@ export default async function EditGiveawayPage({
   const title = (giveaway.title ?? {}) as { en?: string; ar?: string };
   const description = (giveaway.description ?? {}) as { en?: string; ar?: string };
   const prize = (giveaway.prize_description ?? {}) as { en?: string; ar?: string };
-  const methods = (giveaway.entry_methods ?? {}) as Methods;
-
   const initial: GiveawayInput = {
     slug: giveaway.slug,
     title: { en: title.en ?? "", ar: title.ar ?? "" },
@@ -39,11 +71,7 @@ export default async function EditGiveawayPage({
     prize_description: { en: prize.en ?? "", ar: prize.ar ?? "" },
     prize_image_url: giveaway.prize_image_url,
     estimated_value: giveaway.estimated_value,
-    entry_methods: {
-      follow_required: methods.follow_required ?? false,
-      discord_required: methods.discord_required ?? false,
-      share_bonus: methods.share_bonus ?? false,
-    },
+    entry_methods: readEntryMethodsFromDb(giveaway.entry_methods),
     starts_at: giveaway.starts_at,
     ends_at: giveaway.ends_at,
     status: giveaway.status,

@@ -16,7 +16,7 @@ import type { Insert, Json } from "@/types/database";
 import { fail, ok, pickTranslation, type Result } from "@/types/domain";
 
 const ENTRY_METHOD_TYPES = [
-  "follow_x",
+  "follow_tiktok",
   "join_discord",
   "subscribe_youtube",
   "share",

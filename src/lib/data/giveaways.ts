@@ -25,6 +25,23 @@ export async function getActiveGiveaway(): Promise<Giveaway | null> {
   )();
 }
 
+export async function getActiveGiveaways(): Promise<Giveaway[]> {
+  return cache(
+    async () => {
+      const supabase = createPublicClient();
+      const { data, error } = await supabase
+        .from("giveaways")
+        .select("*")
+        .eq("status", "active")
+        .order("ends_at", { ascending: true });
+      if (error || !data) return [];
+      return data as unknown as Giveaway[];
+    },
+    ["giveaways-active-all"],
+    { revalidate: REVALIDATE, tags: [TAG_GIVEAWAYS] },
+  )();
+}
+
 export async function getCompletedGiveaways(limit = 6): Promise<Giveaway[]> {
   return cache(
     async () => {

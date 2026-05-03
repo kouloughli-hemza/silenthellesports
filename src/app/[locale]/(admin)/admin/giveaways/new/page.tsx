@@ -14,7 +14,12 @@ const EMPTY: GiveawayInput = {
   prize_description: { en: "", ar: "" },
   prize_image_url: null,
   estimated_value: null,
-  entry_methods: { follow_required: true, discord_required: false, share_bonus: false },
+  entry_methods: {
+    follow_tiktok: { enabled: false, url: "" },
+    join_discord: { enabled: false, url: "" },
+    subscribe_youtube: { enabled: false, url: "" },
+    share: { enabled: false, url: "" },
+  },
   starts_at: now.toISOString(),
   ends_at: inAWeek.toISOString(),
   status: "upcoming",

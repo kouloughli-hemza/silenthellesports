@@ -11,9 +11,7 @@ interface Initial {
   season: { en: string; ar: string };
   discordUrl: string;
   discordCount: string;
-  twitch: string;
   youtube: string;
-  x: string;
   instagram: string;
   tiktok: string;
   drop: number;
@@ -177,25 +175,11 @@ export function SiteConfigForm({ initial }: { initial: Initial }) {
               onChange={(e) => set("discordCount", e.target.value)}
             />
           </Field>
-          <Field label="Twitch channel">
-            <input
-              className="field"
-              value={state.twitch}
-              onChange={(e) => set("twitch", e.target.value)}
-            />
-          </Field>
           <Field label="YouTube channel">
             <input
               className="field"
               value={state.youtube}
               onChange={(e) => set("youtube", e.target.value)}
-            />
-          </Field>
-          <Field label="X handle">
-            <input
-              className="field"
-              value={state.x}
-              onChange={(e) => set("x", e.target.value)}
             />
           </Field>
           <Field label="Instagram handle">

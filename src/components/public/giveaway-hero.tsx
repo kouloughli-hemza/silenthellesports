@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import { EmberField, PlaceholderImage } from "@/components/brand";
 import { GiveawayBurst } from "@/components/scenes/GiveawayBurst";
@@ -117,10 +118,21 @@ export async function GiveawayHero({ locale }: GiveawayHeroProps) {
           >
             {/* prize visual */}
             <div className="relative aspect-[4/3] lg:aspect-auto lg:min-h-[560px]">
-              <PlaceholderImage
-                label={prizeText || titleText || "PRIZE"}
-                aspect="auto"
-              />
+              {giveaway.prize_image_url ? (
+                <Image
+                  src={giveaway.prize_image_url}
+                  alt={prizeText || titleText || "Prize"}
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  style={{ objectFit: "cover" }}
+                  priority
+                />
+              ) : (
+                <PlaceholderImage
+                  label={prizeText || titleText || "PRIZE"}
+                  aspect="auto"
+                />
+              )}
               <div
                 className="absolute inset-0"
                 style={{

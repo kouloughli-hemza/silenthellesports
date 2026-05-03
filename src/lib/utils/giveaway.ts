@@ -8,14 +8,14 @@ const TranslatedSchema = z.object({
 });
 
 const EntryMethodSchema = z.object({
-  type: z.enum(["follow_x", "join_discord", "subscribe_youtube", "share"]),
+  type: z.enum(["follow_tiktok", "join_discord", "subscribe_youtube", "share"]),
   label: TranslatedSchema,
   url: z.string().url(),
   weight: z.number().int().nonnegative(),
 });
 
 const ENTRY_ICONS: Record<GiveawayEntryMethod["type"], string> = {
-  follow_x: "𝕏",
+  follow_tiktok: "TT",
   join_discord: "DC",
   subscribe_youtube: "YT",
   share: "↗",

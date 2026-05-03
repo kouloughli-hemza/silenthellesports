@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 
@@ -12,7 +13,7 @@ import { Link } from "@/lib/i18n/routing";
 import { isLocale } from "@/lib/i18n/routing";
 import { getSessionUser } from "@/lib/auth/session";
 import {
-  getActiveGiveaway,
+  getActiveGiveaways,
   getCompletedGiveaways,
   getGiveawayEntryCount,
 } from "@/lib/data/giveaways";
@@ -65,17 +66,19 @@ export default async function GiveawaysPage({
   const t = await getTranslations({ locale, namespace: "giveaway" });
   const isAr = locale === "ar";
 
-  const [active, completed] = await Promise.all([
-    getActiveGiveaway(),
+  const [actives, completed] = await Promise.all([
+    getActiveGiveaways(),
     getCompletedGiveaways(6),
   ]);
+  const active = actives[0] ?? null;
+  const otherActives = actives.slice(1);
 
   const entryCount = active ? await getGiveawayEntryCount(active.id) : 0;
   const session = active ? await getSessionUser() : null;
   const existingEntry = active
     ? await getExistingEntryForCurrentUser(active.id)
     : null;
-  const hasContent = Boolean(active) || completed.length > 0;
+  const hasContent = actives.length > 0 || completed.length > 0;
   const rules = (t.raw("rules") as RuleEntry[]) ?? [];
 
   const formI18n: GiveawayEntryFormI18n = {
@@ -119,7 +122,7 @@ export default async function GiveawaysPage({
             existingEntry
               ? existingEntry.completedMethods.filter(
                   (m): m is GiveawayEntryMethodType =>
-                    m === "follow_x" ||
+                    m === "follow_tiktok" ||
                     m === "join_discord" ||
                     m === "subscribe_youtube" ||
                     m === "share",
@@ -149,6 +152,17 @@ export default async function GiveawaysPage({
           archiveSub={t("archiveSub")}
         />
       )}
+
+      {otherActives.length > 0 ? (
+        <AlsoLive
+          giveaways={otherActives}
+          locale={locale}
+          alsoLiveLabel={t("alsoLive")}
+          alsoLiveSub={t("alsoLiveSub")}
+          enterLabel={t("enterLabel")}
+          endsFmt={(date: string) => t("endsOn", { date })}
+        />
+      ) : null}
 
       {completed.length > 0 ? (
         <PastWinners
@@ -291,7 +305,18 @@ function ActiveGiveawayHero({
           >
             {/* left: prize visual */}
             <div className="relative aspect-[4/3] lg:aspect-auto lg:min-h-[560px]">
-              <PlaceholderImage label={prizeText || title} aspect="auto" />
+              {giveaway.prize_image_url ? (
+                <Image
+                  src={giveaway.prize_image_url}
+                  alt={prizeText || title}
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  style={{ objectFit: "cover" }}
+                  priority
+                />
+              ) : (
+                <PlaceholderImage label={prizeText || title} aspect="auto" />
+              )}
               <div
                 className="absolute inset-0"
                 aria-hidden
@@ -502,7 +527,17 @@ function PastWinners({
                 }}
               >
                 <div className="relative aspect-[4/3] overflow-hidden">
-                  <PlaceholderImage label={title} aspect="4/3" />
+                  {g.prize_image_url ? (
+                    <Image
+                      src={g.prize_image_url}
+                      alt={title}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                      style={{ objectFit: "cover" }}
+                    />
+                  ) : (
+                    <PlaceholderImage label={title} aspect="4/3" />
+                  )}
                   <div
                     className="absolute top-3 left-3 font-mono text-[9px] tracking-[0.25em] uppercase"
                     style={{
@@ -537,6 +572,108 @@ function PastWinners({
                     style={{ color: "var(--hell-red)" }}
                   >
                     <span>{viewDraw}</span>
+                    <span>→</span>
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ----------------------------------------------------------------------------
+// Also live — secondary active giveaways shown under the hero.
+// ----------------------------------------------------------------------------
+
+function AlsoLive({
+  giveaways,
+  locale,
+  alsoLiveLabel,
+  alsoLiveSub,
+  enterLabel,
+  endsFmt,
+}: {
+  giveaways: Giveaway[];
+  locale: Locale;
+  alsoLiveLabel: string;
+  alsoLiveSub: string;
+  enterLabel: string;
+  endsFmt: (date: string) => string;
+}) {
+  return (
+    <section className="relative py-16 md:py-20" style={{ background: "var(--black)" }}>
+      <div className="mx-auto max-w-[1400px] px-6 md:px-10">
+        <div className="mb-8">
+          <span className="section-label">{alsoLiveLabel}</span>
+          <h2
+            className="font-display mt-3 text-3xl leading-[0.95] font-black uppercase md:text-4xl"
+            style={{ color: "var(--bone)" }}
+          >
+            {alsoLiveSub}
+          </h2>
+        </div>
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+          {giveaways.map((g) => {
+            const title = pickTranslation(g.title, locale);
+            const prize = pickTranslation(g.prize_description, locale);
+            return (
+              <Link
+                key={g.id}
+                href={`/giveaways/${g.slug}`}
+                className="card-bite interactive group flex flex-col"
+                style={{
+                  background: "var(--ash-1)",
+                  border: "1px solid rgba(230,0,19,0.25)",
+                }}
+              >
+                <div className="relative aspect-[4/3] overflow-hidden">
+                  {g.prize_image_url ? (
+                    <Image
+                      src={g.prize_image_url}
+                      alt={title}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                      style={{ objectFit: "cover" }}
+                    />
+                  ) : (
+                    <PlaceholderImage label={title} aspect="4/3" />
+                  )}
+                  <div
+                    className="absolute top-3 left-3 flex items-center gap-2 px-2 py-1"
+                    style={{ background: "var(--hell-red)" }}
+                  >
+                    <span className="live-dot" style={{ background: "var(--bone)" }} />
+                    <span className="font-mono text-[9px] font-bold tracking-[0.25em] uppercase">
+                      {alsoLiveLabel.replace(/^\/\/\s*/, "")}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex flex-1 flex-col gap-2 p-4">
+                  <div
+                    className="font-mono text-[10px] tracking-[0.25em] uppercase"
+                    style={{ color: "rgba(245,240,232,0.5)" }}
+                  >
+                    {endsFmt(formatDateLong(g.ends_at, locale))}
+                  </div>
+                  <div className="font-display glitch-target text-base leading-tight font-black italic uppercase md:text-lg">
+                    {title}
+                  </div>
+                  {prize ? (
+                    <div
+                      className="text-xs leading-snug"
+                      style={{ color: "rgba(245,240,232,0.65)" }}
+                    >
+                      {prize}
+                    </div>
+                  ) : null}
+                  <div
+                    className="mt-auto flex items-center justify-between pt-3 font-mono text-[10px] tracking-[0.25em] uppercase"
+                    style={{ color: "var(--hell-red)" }}
+                  >
+                    <span>{enterLabel}</span>
                     <span>→</span>
                   </div>
                 </div>
