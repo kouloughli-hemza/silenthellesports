@@ -27,6 +27,7 @@ const ServerEnvSchema = PublicEnvSchema.extend({
   YALIDINE_FROM_WILAYA_CODE: z.coerce.number().int().min(1).max(58).default(16),
   RESEND_API_KEY: optionalStr,
   RESEND_FROM_EMAIL: z.string().default("Silent Hell <noreply@silenthellesports.com>"),
+  CONTACT_TO_EMAIL: z.string().email().default("support@silenthellesports.com"),
   ADMIN_BOOTSTRAP_EMAIL: optionalEmail,
 });
 

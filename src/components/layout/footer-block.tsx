@@ -13,7 +13,7 @@ interface FooterBlockProps {
 
 interface FooterColumn {
   heading: string;
-  links: Array<{ label: string; href: "/" | "/roster" | "/store" | "/events" | "/giveaways" | "/about" | "/terms" | "/privacy" | "/sizing" | "/returns" }>;
+  links: Array<{ label: string; href: "/" | "/roster" | "/store" | "/events" | "/giveaways" | "/about" | "/contact" | "/terms" | "/privacy" | "/sizing" | "/returns" }>;
 }
 
 export async function FooterBlock({ locale }: FooterBlockProps) {
@@ -39,6 +39,7 @@ export async function FooterBlock({ locale }: FooterBlockProps) {
       heading: t("squad"),
       links: [
         { label: locale === "ar" ? "عن الفريق" : "About", href: "/about" },
+        { label: locale === "ar" ? "تواصل" : "Contact", href: "/contact" },
       ],
     },
     {
