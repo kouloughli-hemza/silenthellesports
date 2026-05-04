@@ -53,7 +53,10 @@ export async function sendContactMessageAction(
 
   if (!result.success) {
     console.error("[contact] sendEmail failed", result.error);
-    return fail("Couldn't send your message. Try again in a moment.");
+    // Surface the underlying Resend error to the user. Most causes are config
+    // problems (unverified domain, missing API key) the operator can act on,
+    // and hiding them just turns every failure into "try again".
+    return fail(`Email delivery failed: ${result.error}`);
   }
   return ok({ delivered: true });
 }
