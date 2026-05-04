@@ -160,7 +160,7 @@ export function ContactForm({ i18n }: ContactFormProps) {
       {success ? (
         <div
           className="font-mono text-[11px] tracking-[0.2em] uppercase"
-          style={{ color: "var(--ember)" }}
+          style={{ color: "var(--signal-green)" }}
           role="status"
         >
           {i18n.success}
