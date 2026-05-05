@@ -19,8 +19,8 @@ interface HeroGalleryProps {
 }
 
 export function HeroGallery({ locale, items }: HeroGalleryProps) {
-  if (items.length === 0) return null;
-  const ITEMS = items;
+  // Hooks first — they must run on every render in the same order. The
+  // empty-items guard sits AFTER all hook calls (Rules of Hooks).
   const [idx, setIdx] = useState(0);
   const [glitch, setGlitch] = useState(false);
   const [paused, setPaused] = useState(false);
@@ -29,12 +29,10 @@ export function HeroGallery({ locale, items }: HeroGalleryProps) {
   const [now, setNow] = useState<string>("--:--:--");
   const [typed, setTyped] = useState("");
   const frameRef = useRef<HTMLDivElement | null>(null);
-  const total = ITEMS.length;
+  const total = items.length;
 
-  const current = ITEMS[idx]!;
-  const next = ITEMS[(idx + 1) % total]!;
-  const caption = pickTranslation(current.caption, locale);
-  const meta = pickTranslation(current.meta, locale);
+  const current = total > 0 ? items[idx % total] : null;
+  const captionText = current ? pickTranslation(current.caption, locale) : "";
   const frameLabel = useMemo(
     () => `FRAME ${String(idx + 1).padStart(2, "0")} / ${String(total).padStart(2, "0")}`,
     [idx, total],
@@ -43,6 +41,7 @@ export function HeroGallery({ locale, items }: HeroGalleryProps) {
   // Rotation timer. Pauses while the cursor is over the frame.
   useEffect(() => {
     if (paused) return;
+    if (total === 0) return;
     const t = window.setInterval(() => {
       setGlitch(true);
       window.setTimeout(() => setGlitch(false), 220);
@@ -58,17 +57,18 @@ export function HeroGallery({ locale, items }: HeroGalleryProps) {
     return () => window.clearInterval(t);
   }, []);
 
-  // Typewriter caption — restart whenever idx changes.
+  // Typewriter caption — restart whenever the visible caption changes.
   useEffect(() => {
     setTyped("");
+    if (!captionText) return;
     let i = 0;
     const t = window.setInterval(() => {
       i += 1;
-      setTyped(caption.slice(0, i));
-      if (i >= caption.length) window.clearInterval(t);
+      setTyped(captionText.slice(0, i));
+      if (i >= captionText.length) window.clearInterval(t);
     }, 38);
     return () => window.clearInterval(t);
-  }, [caption]);
+  }, [captionText]);
 
   // Cursor-tilt parallax. Skip on touch / reduced-motion.
   useEffect(() => {
@@ -104,6 +104,15 @@ export function HeroGallery({ locale, items }: HeroGalleryProps) {
     window.setTimeout(() => setGlitch(false), 220);
     setIdx(i);
   }
+
+  // Empty-items guard placed AFTER all hooks so React's render-order
+  // invariants stay intact. Parents already filter, but defending here
+  // means future callers can't crash this component.
+  if (!current) return null;
+
+  const ITEMS = items;
+  const next = ITEMS[(idx + 1) % total]!;
+  const meta = pickTranslation(current.meta, locale);
 
   return (
     <div className="hero-gallery-stage">
