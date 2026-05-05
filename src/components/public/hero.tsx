@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { getTranslations } from "next-intl/server";
-import { CountUp, EmberField } from "@/components/brand";
+import { EmberField } from "@/components/brand";
+import { HeroGallery } from "@/components/public/hero-gallery";
 import { getSiteConfig } from "@/lib/site-config";
 import { pickTranslation, type Locale } from "@/types/domain";
 
@@ -13,17 +14,9 @@ export async function Hero({ locale }: HeroProps) {
   const ctaT = await getTranslations({ locale, namespace: "cta" });
   const headline = await getSiteConfig("hero.headline");
   const tagline = await getSiteConfig("hero.tagline");
-  const stats = await getSiteConfig("hero.stats");
   const season = await getSiteConfig("hero.season");
   const discordUrl = await getSiteConfig("socials.discord_url");
   const isAr = locale === "ar";
-
-  const statRows = [
-    { n: stats.enemies, label: t("stats.enemies"), suffix: "" },
-    { n: stats.tournaments, label: t("stats.tournaments"), suffix: "" },
-    { n: stats.kd, label: t("stats.kd"), suffix: "", decimals: 2 },
-    { n: stats.headshot, label: t("stats.headshot"), suffix: "%" },
-  ];
 
   return (
     <>
@@ -147,29 +140,9 @@ export async function Hero({ locale }: HeroProps) {
             </div>
           </div>
 
-          {/* right: stats — desktop only */}
+          {/* right: gallery — desktop only */}
           <div className="anim-fade-up hidden md:block md:order-3" style={{ animationDelay: "1.4s" }}>
-            <div
-              className="grid grid-cols-2 gap-px"
-              style={{ background: "rgba(230,0,19,0.25)" }}
-            >
-              {statRows.map((s, i) => (
-                <div key={i} className="p-5" style={{ background: "var(--ash-3)" }}>
-                  <div
-                    className="mb-2 font-mono text-[9px] tracking-[0.25em] uppercase"
-                    style={{ color: "var(--hell-red)" }}
-                  >
-                    {`/// ${String(i + 1).padStart(2, "0")}`}
-                  </div>
-                  <div className="font-display text-3xl font-black md:text-4xl" style={{ color: "var(--bone)" }}>
-                    <CountUp to={s.n} suffix={s.suffix} decimals={s.decimals ?? 0} />
-                  </div>
-                  <div className="mt-1 text-xs" style={{ color: "rgba(245,240,232,0.55)" }}>
-                    {s.label}
-                  </div>
-                </div>
-              ))}
-            </div>
+            <HeroGallery locale={locale} />
             <div
               className="mt-4 flex items-center gap-2 font-mono text-[10px] tracking-[0.2em] uppercase"
               style={{ color: "rgba(245,240,232,0.5)" }}
@@ -242,29 +215,8 @@ export async function Hero({ locale }: HeroProps) {
             <span style={{ color: "var(--hell-red)" }}>{isAr ? "←" : "→"}</span>
           </a>
         </div>
-        <div
-          className="mt-8 grid grid-cols-2 gap-px"
-          style={{ background: "rgba(230,0,19,0.25)" }}
-        >
-          {statRows.map((s, i) => (
-            <div key={i} className="p-4" style={{ background: "var(--ash-1)" }}>
-              <div
-                className="mb-1 font-mono text-[9px] tracking-[0.25em] uppercase"
-                style={{ color: "var(--hell-red)" }}
-              >
-                {`/// ${String(i + 1).padStart(2, "0")}`}
-              </div>
-              <div
-                className="font-display text-2xl font-black"
-                style={{ color: "var(--bone)" }}
-              >
-                <CountUp to={s.n} suffix={s.suffix} decimals={s.decimals ?? 0} />
-              </div>
-              <div className="mt-1 text-xs" style={{ color: "rgba(245,240,232,0.6)" }}>
-                {s.label}
-              </div>
-            </div>
-          ))}
+        <div className="mt-8">
+          <HeroGallery locale={locale} />
         </div>
         <div
           className="mt-4 flex items-center gap-2 font-mono text-[10px] tracking-[0.2em] uppercase"

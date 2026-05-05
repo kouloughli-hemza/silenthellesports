@@ -943,3 +943,42 @@ select {
   letter-spacing: 0.2em;
   text-transform: uppercase;
 }
+
+/* ----------------------------------------------------------------------------
+   Hero gallery — 2x2 photo mosaic that replaces the stats block. Photos start
+   slightly desaturated/dim so they read as part of the dark hero, then ease
+   to full color and a subtle Ken Burns zoom on hover. Group hover ties the
+   red wash to the same trigger.
+---------------------------------------------------------------------------- */
+.hero-gallery-tile .hero-gallery-img {
+  object-fit: cover;
+  filter: grayscale(0.5) brightness(0.78) contrast(1.05);
+  transform: scale(1.02);
+  transition:
+    filter 600ms ease,
+    transform 8000ms ease;
+}
+
+.hero-gallery-tile:hover .hero-gallery-img,
+.hero-gallery-tile:focus-within .hero-gallery-img {
+  filter: grayscale(0) brightness(0.95) contrast(1.08);
+  transform: scale(1.12);
+}
+
+.hero-gallery-wash {
+  background: linear-gradient(135deg, transparent 60%, rgba(230, 0, 19, 0.18) 100%);
+  opacity: 0;
+  transition: opacity 400ms ease;
+}
+
+.hero-gallery-tile:hover .hero-gallery-wash,
+.hero-gallery-tile:focus-within .hero-gallery-wash {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-gallery-tile .hero-gallery-img {
+    transition: none;
+    transform: none;
+  }
+}
