@@ -945,40 +945,106 @@ select {
 }
 
 /* ----------------------------------------------------------------------------
-   Hero gallery — 2x2 photo mosaic that replaces the stats block. Photos start
-   slightly desaturated/dim so they read as part of the dark hero, then ease
-   to full color and a subtle Ken Burns zoom on hover. Group hover ties the
-   red wash to the same trigger.
+   Hero gallery — single rotating cinematic frame. One large 3:4 tile that
+   crossfades between photos. Active photo gets a slow Ken Burns zoom for
+   the duration it's on screen. CRT scanlines + REC indicator + frame
+   counter sell the "we're broadcasting" feel without leaning on stats.
 ---------------------------------------------------------------------------- */
-.hero-gallery-tile .hero-gallery-img {
+.hero-gallery-frame {
+  border: 1px solid rgba(230, 0, 19, 0.3);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.6) inset,
+    0 30px 60px -25px rgba(230, 0, 19, 0.4);
+}
+
+.hero-gallery-photo {
   object-fit: cover;
-  filter: grayscale(0.5) brightness(0.78) contrast(1.05);
-  transform: scale(1.02);
-  transition:
-    filter 600ms ease,
-    transform 8000ms ease;
+  filter: contrast(1.08) brightness(0.92) saturate(0.95);
+  transform: scale(1.05);
 }
 
-.hero-gallery-tile:hover .hero-gallery-img,
-.hero-gallery-tile:focus-within .hero-gallery-img {
-  filter: grayscale(0) brightness(0.95) contrast(1.08);
-  transform: scale(1.12);
+.hero-gallery-photo.is-active {
+  animation: hero-gallery-zoom 6500ms ease-out forwards;
 }
 
-.hero-gallery-wash {
-  background: linear-gradient(135deg, transparent 60%, rgba(230, 0, 19, 0.18) 100%);
-  opacity: 0;
-  transition: opacity 400ms ease;
+@keyframes hero-gallery-zoom {
+  from {
+    transform: scale(1.05);
+  }
+  to {
+    transform: scale(1.16);
+  }
 }
 
-.hero-gallery-tile:hover .hero-gallery-wash,
-.hero-gallery-tile:focus-within .hero-gallery-wash {
-  opacity: 1;
+.hero-gallery-scanlines {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(245, 240, 232, 0.04) 0px,
+    rgba(245, 240, 232, 0.04) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  mix-blend-mode: overlay;
+  opacity: 0.45;
+}
+
+.hero-gallery-rec {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--hell-red);
+  box-shadow: 0 0 6px var(--hell-red);
+  animation: hero-gallery-rec-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes hero-gallery-rec-pulse {
+  0%, 100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.hero-gallery-meta,
+.hero-gallery-caption {
+  animation: hero-gallery-slide 480ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.hero-gallery-caption {
+  animation-delay: 80ms;
+}
+
+@keyframes hero-gallery-slide {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero-gallery-bar-fill {
+  animation: hero-gallery-bar 5500ms linear forwards;
+  background: var(--hell-red);
+}
+
+@keyframes hero-gallery-bar {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero-gallery-tile .hero-gallery-img {
-    transition: none;
-    transform: none;
+  .hero-gallery-photo.is-active,
+  .hero-gallery-bar-fill,
+  .hero-gallery-rec,
+  .hero-gallery-meta,
+  .hero-gallery-caption {
+    animation: none;
   }
 }
