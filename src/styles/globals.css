@@ -950,11 +950,34 @@ select {
    the duration it's on screen. CRT scanlines + REC indicator + frame
    counter sell the "we're broadcasting" feel without leaning on stats.
 ---------------------------------------------------------------------------- */
+.hero-gallery-stage {
+  perspective: 1400px;
+  perspective-origin: 50% 60%;
+}
+
 .hero-gallery-frame {
-  border: 1px solid rgba(230, 0, 19, 0.3);
+  --tilt-x: 0deg;
+  --tilt-y: 0deg;
+  border: 1px solid rgba(230, 0, 19, 0.35);
   box-shadow:
     0 0 0 1px rgba(0, 0, 0, 0.6) inset,
-    0 30px 60px -25px rgba(230, 0, 19, 0.4);
+    0 0 0 6px rgba(10, 10, 10, 0.5),
+    0 0 0 7px rgba(230, 0, 19, 0.25),
+    0 30px 70px -20px rgba(230, 0, 19, 0.45);
+  transform: rotateX(var(--tilt-x)) rotateY(var(--tilt-y));
+  transform-style: preserve-3d;
+  transition: transform 220ms ease-out;
+  will-change: transform;
+}
+
+.hero-gallery-frame::after {
+  /* Soft red edge bleed — broadcast-monitor halation */
+  content: "";
+  position: absolute;
+  inset: -1px;
+  pointer-events: none;
+  box-shadow: inset 0 0 60px rgba(230, 0, 19, 0.15);
+  z-index: 2;
 }
 
 .hero-gallery-photo {
@@ -965,6 +988,75 @@ select {
 
 .hero-gallery-photo.is-active {
   animation: hero-gallery-zoom 6500ms ease-out forwards;
+}
+
+/* RGB chromatic split — three stacked copies of the same photo. Base layer
+   is the normal image; the .hero-gallery-rgb wrappers add a coloured tint
+   and a horizontal offset that's invisible until .is-glitching toggles them
+   on. */
+.hero-gallery-rgb {
+  mix-blend-mode: screen;
+  opacity: 0;
+  pointer-events: none;
+}
+.hero-gallery-rgb-r {
+  background: var(--hell-red);
+}
+.hero-gallery-rgb-r .hero-gallery-photo {
+  mix-blend-mode: multiply;
+}
+.hero-gallery-rgb-c {
+  background: #00bcd4;
+}
+.hero-gallery-rgb-c .hero-gallery-photo {
+  mix-blend-mode: multiply;
+}
+
+.hero-gallery-frame.is-glitching .hero-gallery-rgb-r {
+  opacity: 0.45;
+  transform: translateX(-3px);
+  transition:
+    opacity 80ms ease,
+    transform 80ms ease;
+}
+.hero-gallery-frame.is-glitching .hero-gallery-rgb-c {
+  opacity: 0.45;
+  transform: translateX(3px);
+  transition:
+    opacity 80ms ease,
+    transform 80ms ease;
+}
+.hero-gallery-rgb {
+  transition:
+    opacity 220ms ease,
+    transform 220ms ease;
+}
+
+/* Periodic scan sweep — a thin horizontal bright line slides top-to-bottom
+   roughly every 7s. Adds life without being noisy. */
+.hero-gallery-scan-sweep {
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    transparent 48%,
+    rgba(245, 240, 232, 0.18) 49%,
+    rgba(245, 240, 232, 0.32) 50%,
+    rgba(245, 240, 232, 0.18) 51%,
+    transparent 52%,
+    transparent 100%
+  );
+  background-size: 100% 200%;
+  animation: hero-gallery-sweep 7s ease-in-out infinite;
+  mix-blend-mode: screen;
+  opacity: 0.9;
+}
+@keyframes hero-gallery-sweep {
+  0% {
+    background-position: 0% -100%;
+  }
+  100% {
+    background-position: 0% 200%;
+  }
 }
 
 @keyframes hero-gallery-zoom {
@@ -1012,6 +1104,32 @@ select {
 }
 .hero-gallery-caption {
   animation-delay: 80ms;
+  animation:
+    hero-gallery-slide 480ms cubic-bezier(0.2, 0.8, 0.2, 1) 80ms both,
+    hero-gallery-glitch 360ms steps(2) 80ms 1;
+}
+
+/* Brief glitch jitter on caption swap — split the text horizontally for two
+   frames so it reads as a "channel change" effect. */
+@keyframes hero-gallery-glitch {
+  0% {
+    transform: translate(0, 8px);
+    text-shadow:
+      -2px 0 var(--hell-red),
+      2px 0 #00bcd4,
+      0 2px 18px rgba(0, 0, 0, 0.6);
+  }
+  20% {
+    transform: translate(2px, 4px);
+    text-shadow:
+      -1px 0 var(--hell-red),
+      1px 0 #00bcd4,
+      0 2px 18px rgba(0, 0, 0, 0.6);
+  }
+  100% {
+    transform: translate(0, 0);
+    text-shadow: 0 2px 18px rgba(0, 0, 0, 0.6);
+  }
 }
 
 @keyframes hero-gallery-slide {
@@ -1039,12 +1157,71 @@ select {
   }
 }
 
+/* Picture-in-picture preview (next-frame). Tiny secondary monitor in
+   the top-right; should read as a smaller version of the main frame. */
+.hero-gallery-pip {
+  border: 1px solid rgba(230, 0, 19, 0.45);
+  background: var(--ash-3);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.7) inset,
+    0 8px 18px -6px rgba(230, 0, 19, 0.45);
+}
+.hero-gallery-pip-img {
+  object-fit: cover;
+  filter: grayscale(0.35) contrast(1.1) brightness(0.78);
+}
+
+/* Filmstrip thumbnails along the bottom edge. Active one gets a red border
+   and a fill bar that shows rotation progress. */
+.hero-gallery-thumb {
+  background: var(--ash-3);
+  border: 1px solid rgba(245, 240, 232, 0.08);
+  cursor: pointer;
+  transition:
+    transform 220ms ease,
+    border-color 220ms ease;
+}
+.hero-gallery-thumb:hover {
+  transform: translateY(-2px);
+  border-color: rgba(230, 0, 19, 0.5);
+}
+.hero-gallery-thumb-img {
+  object-fit: cover;
+  filter: grayscale(0.6) brightness(0.7);
+}
+.hero-gallery-thumb.is-active .hero-gallery-thumb-img {
+  filter: grayscale(0) brightness(1);
+}
+.hero-gallery-thumb-fill {
+  background: var(--hell-red);
+  animation: hero-gallery-bar 5500ms linear forwards;
+}
+
+/* Typewriter cursor — blinks while the caption is finishing. */
+.hero-gallery-cursor {
+  display: inline-block;
+  margin-left: 4px;
+  color: var(--hell-red);
+  animation: hero-gallery-cursor-blink 0.9s steps(2) infinite;
+}
+@keyframes hero-gallery-cursor-blink {
+  0%, 50% { opacity: 1; }
+  50.01%, 100% { opacity: 0; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .hero-gallery-photo.is-active,
   .hero-gallery-bar-fill,
   .hero-gallery-rec,
   .hero-gallery-meta,
-  .hero-gallery-caption {
+  .hero-gallery-caption,
+  .hero-gallery-scan-sweep,
+  .hero-gallery-thumb-fill,
+  .hero-gallery-cursor {
     animation: none;
+  }
+  .hero-gallery-frame {
+    transition: none;
+    transform: none;
   }
 }

@@ -25,10 +25,6 @@ const config: NextConfig = {
       // PUBG map images for the seeded tactic boards. Replace with admin
       // uploads to your own Supabase bucket whenever you want to detach.
       { protocol: "https", hostname: "raw.githubusercontent.com" },
-      // Hero gallery uses Unsplash photos as static placeholders until the
-      // admin gallery uploader ships. Safe to remove once content is moving
-      // through Supabase storage.
-      { protocol: "https", hostname: "images.unsplash.com" },
     ],
   },
   typedRoutes: true,

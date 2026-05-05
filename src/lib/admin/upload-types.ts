@@ -5,5 +5,6 @@ export const UPLOAD_BUCKETS = [
   "giveaways",
   "events",
   "pages",
+  "gallery",
 ] as const;
 export type UploadBucket = (typeof UPLOAD_BUCKETS)[number];

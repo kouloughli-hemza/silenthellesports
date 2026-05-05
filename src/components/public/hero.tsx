@@ -1,7 +1,8 @@
 import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import { EmberField } from "@/components/brand";
-import { HeroGallery } from "@/components/public/hero-gallery";
+import { HeroGallery, type HeroGalleryItem } from "@/components/public/hero-gallery";
+import { getActiveGalleryImages } from "@/lib/data/gallery";
 import { getSiteConfig } from "@/lib/site-config";
 import { pickTranslation, type Locale } from "@/types/domain";
 
@@ -16,7 +17,19 @@ export async function Hero({ locale }: HeroProps) {
   const tagline = await getSiteConfig("hero.tagline");
   const season = await getSiteConfig("hero.season");
   const discordUrl = await getSiteConfig("socials.discord_url");
+  const galleryRows = await getActiveGalleryImages(8);
   const isAr = locale === "ar";
+
+  const galleryItems: HeroGalleryItem[] = galleryRows.map((row) => ({
+    src: row.image_url,
+    caption: row.caption,
+    meta: row.meta,
+    hud: {
+      heading: row.hud_heading ?? "—",
+      zone: row.hud_zone ?? "—",
+      signal: row.hud_signal ?? "—",
+    },
+  }));
 
   return (
     <>
@@ -140,16 +153,18 @@ export async function Hero({ locale }: HeroProps) {
             </div>
           </div>
 
-          {/* right: gallery — desktop only */}
-          <div className="anim-fade-up hidden md:block md:order-3" style={{ animationDelay: "1.4s" }}>
-            <HeroGallery locale={locale} />
-            <div
-              className="mt-4 flex items-center gap-2 font-mono text-[10px] tracking-[0.2em] uppercase"
-              style={{ color: "rgba(245,240,232,0.5)" }}
-            >
-              <span className="live-dot" /> {pickTranslation(season, locale)}
+          {/* right: gallery — desktop only, hidden when admin hasn't uploaded any */}
+          {galleryItems.length > 0 ? (
+            <div className="anim-fade-up hidden md:block md:order-3" style={{ animationDelay: "1.4s" }}>
+              <HeroGallery locale={locale} items={galleryItems} />
+              <div
+                className="mt-4 flex items-center gap-2 font-mono text-[10px] tracking-[0.2em] uppercase"
+                style={{ color: "rgba(245,240,232,0.5)" }}
+              >
+                <span className="live-dot" /> {pickTranslation(season, locale)}
+              </div>
             </div>
-          </div>
+          ) : null}
         </div>
       </div>
 
@@ -215,9 +230,11 @@ export async function Hero({ locale }: HeroProps) {
             <span style={{ color: "var(--hell-red)" }}>{isAr ? "←" : "→"}</span>
           </a>
         </div>
-        <div className="mt-8">
-          <HeroGallery locale={locale} />
-        </div>
+        {galleryItems.length > 0 ? (
+          <div className="mt-8">
+            <HeroGallery locale={locale} items={galleryItems} />
+          </div>
+        ) : null}
         <div
           className="mt-4 flex items-center gap-2 font-mono text-[10px] tracking-[0.2em] uppercase"
           style={{ color: "rgba(245,240,232,0.5)" }}
