@@ -454,7 +454,8 @@
     "support": "SUPPORT",
     "sponsors": "// SPONSORS",
     "copy": "© {year} Silent Hell Esports · All silence reserved",
-    "finalCircle": "FINAL CIRCLE · STABLE"
+    "finalCircle": "FINAL CIRCLE · STABLE",
+    "crafted": "BUILT BY"
   },
   "auth": {
     "login": {

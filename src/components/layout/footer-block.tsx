@@ -137,6 +137,35 @@ export async function FooterBlock({ locale }: FooterBlockProps) {
             <LangSwitcher />
           </div>
         </div>
+
+        <div
+          className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 border-t pt-4 font-mono text-[10px] tracking-[0.25em] uppercase"
+          style={{
+            color: "rgba(245,240,232,0.45)",
+            borderColor: "rgba(245,240,232,0.06)",
+          }}
+        >
+          <span style={{ color: "var(--hell-red)" }}>{`// ${t("crafted")}`}</span>
+          <span style={{ color: "rgba(245,240,232,0.7)" }}>Zaki Kouloughli</span>
+          <span style={{ color: "rgba(245,240,232,0.25)" }}>·</span>
+          <a
+            href="mailto:kouloughlihemzait@gmail.com"
+            className="interactive transition-colors hover:text-bone"
+            style={{ color: "rgba(245,240,232,0.6)" }}
+          >
+            kouloughlihemzait@gmail.com
+          </a>
+          <span style={{ color: "rgba(245,240,232,0.25)" }}>·</span>
+          <a
+            href="https://www.facebook.com/systeme32hacker/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="interactive transition-colors hover:text-bone"
+            style={{ color: "rgba(245,240,232,0.6)" }}
+          >
+            Facebook
+          </a>
+        </div>
       </div>
     </footer>
   );
