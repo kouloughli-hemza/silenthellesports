@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { PlaceholderImage } from "@/components/brand";
 import { Link } from "@/lib/i18n/routing";
 import {
@@ -22,6 +23,7 @@ export function ProductCard({ product, index, locale, size = "lg" }: ProductCard
   }`;
   const price = formatPrice(product.base_price, locale, "DZD");
   const tag = product.is_featured ? "NEW" : null;
+  const primaryImage = product.images[0];
 
   return (
     <Link
@@ -33,10 +35,20 @@ export function ProductCard({ product, index, locale, size = "lg" }: ProductCard
     >
       <div className="relative flex h-full flex-col">
         <div className="relative flex-1 overflow-hidden">
-          <PlaceholderImage
-            label={`PRODUCT ${String(index + 1).padStart(2, "0")}`}
-            aspect={aspect}
-          />
+          {primaryImage ? (
+            <Image
+              src={primaryImage}
+              alt={name}
+              fill
+              sizes={size === "sm" ? "200px" : "(max-width: 640px) 50vw, 320px"}
+              className="object-cover"
+            />
+          ) : (
+            <PlaceholderImage
+              label={`PRODUCT ${String(index + 1).padStart(2, "0")}`}
+              aspect={aspect}
+            />
+          )}
         </div>
         {tag ? (
           <div
