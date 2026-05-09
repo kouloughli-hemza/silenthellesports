@@ -104,6 +104,9 @@ export default async function GiveawaysPage({
     h3: t("h3"),
     entry: t("entry"),
     entries: t("entries"),
+    signInTitle: t("signInTitle"),
+    signInSub: t("signInSub"),
+    signInCta: t("signInCta"),
   };
 
   return (
@@ -117,6 +120,7 @@ export default async function GiveawaysPage({
           rules={rules}
           formI18n={formI18n}
           sessionEmail={session?.email ?? null}
+          signedIn={Boolean(session)}
           existingDiscord={existingEntry?.discordTag ?? null}
           existingCompleted={
             existingEntry
@@ -208,6 +212,7 @@ function ActiveGiveawayHero({
   i18n,
   formI18n,
   sessionEmail,
+  signedIn,
   existingDiscord,
   existingCompleted,
   existingEntryCount,
@@ -220,6 +225,7 @@ function ActiveGiveawayHero({
   i18n: HeroI18n;
   formI18n: GiveawayEntryFormI18n;
   sessionEmail: string | null;
+  signedIn: boolean;
   existingDiscord: string | null;
   existingCompleted: GiveawayEntryMethodType[];
   existingEntryCount: number;
@@ -375,6 +381,8 @@ function ActiveGiveawayHero({
                 methods={methods}
                 locale={locale}
                 initialPool={entryCount}
+                signedIn={signedIn}
+                signInNext={`/${locale}/giveaways`}
                 defaultEmail={sessionEmail}
                 defaultDiscordTag={existingDiscord}
                 initialCompleted={existingCompleted}

@@ -86,6 +86,10 @@ export async function submitSignupAction(
   formData: FormData,
   input: { locale: Locale; slug: string },
 ): Promise<Result<ActionResult>> {
+  // ---- 0. Sign-in gate ----
+  const sessionUser = await getSessionUser();
+  if (!sessionUser) return fail("signInRequired");
+
   // ---- 1. Load event (server-authoritative — never trust an event id from client) ----
   const event = await getEventBySlug(input.slug);
   if (!event) return fail("error");
@@ -124,12 +128,11 @@ export async function submitSignupAction(
   }
 
   // ---- 3. Insert (DB trigger enforces capacity / closure) ----
-  const sessionUser = await getSessionUser();
   const admin = createAdminClient();
 
   const insertRow: Insert<"event_signups"> = {
     event_id: event.id,
-    user_id: sessionUser?.id ?? null,
+    user_id: sessionUser.id,
     ign: parsed.data.ign,
     pubg_uid: parsed.data.pubg_uid,
     discord_tag: parsed.data.discord_tag,

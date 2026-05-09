@@ -108,6 +108,10 @@ export async function placeOrderAction(
   rawInput: unknown,
 ): Promise<Result<{ orderNumber: string; locale: Locale }>> {
   try {
+    // Sign-in gate — checkout requires an authenticated user.
+    const sessionUser = await getSessionUser();
+    if (!sessionUser) return fail("signInRequired");
+
     const parsed = PlaceOrderSchema.safeParse(rawInput);
     if (!parsed.success) {
       const first = parsed.error.issues[0];
@@ -146,8 +150,6 @@ export async function placeOrderAction(
     const subtotal = detailed.subtotal;
     const total = subtotal + fee;
 
-    const sessionUser = await getSessionUser();
-
     const supabase = createAdminClient();
 
     const orderInsert: Insert<"orders"> = {
@@ -164,7 +166,7 @@ export async function placeOrderAction(
       total,
       currency: "DZD",
       status: "pending",
-      ...(sessionUser ? { user_id: sessionUser.id } : {}),
+      user_id: sessionUser.id,
     };
 
     const { data: orderRow, error: orderErr } = await supabase

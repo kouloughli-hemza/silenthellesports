@@ -16,13 +16,22 @@ export async function generateMetadata({
 
 export default async function LoginPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ next?: string; error?: string }>;
 }) {
   const { locale } = await params;
+  const { next: rawNext, error: oauthError } = await searchParams;
   if (!isLocale(locale)) notFound();
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: "auth" });
+
+  // Same-origin path only — never accept absolute URLs as `next`.
+  const safeNext =
+    typeof rawNext === "string" && rawNext.startsWith("/") && !rawNext.startsWith("//")
+      ? rawNext
+      : undefined;
 
   return (
     <div className="notch w-full max-w-md p-8" style={{ background: "var(--ash-1)" }}>
@@ -45,12 +54,23 @@ export default async function LoginPage({
         {t("login.sub")}
       </p>
 
+      {oauthError ? (
+        <div className="field-error mt-3" role="alert">
+          {t("login.oauthError")}
+        </div>
+      ) : null}
+
       <LoginForm
+        locale={locale}
+        next={safeNext}
         labels={{
           email: t("fields.email"),
           password: t("fields.password"),
           submit: t("login.submit"),
           submitting: t("login.submitting"),
+          google: t("login.google"),
+          googleStarting: t("login.googleStarting"),
+          or: t("login.or"),
         }}
       />
 
@@ -58,7 +78,15 @@ export default async function LoginPage({
         <Link href="/reset" className="interactive" style={{ color: "rgba(245,240,232,0.6)" }}>
           {t("login.forgot")}
         </Link>
-        <Link href="/signup" className="interactive" style={{ color: "var(--hell-red)" }}>
+        <Link
+          href={
+            (safeNext
+              ? `/signup?next=${encodeURIComponent(safeNext)}`
+              : "/signup") as never
+          }
+          className="interactive"
+          style={{ color: "var(--hell-red)" }}
+        >
           {t("login.toSignup")}
         </Link>
       </div>

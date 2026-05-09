@@ -16,13 +16,21 @@ export async function generateMetadata({
 
 export default async function SignupPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ next?: string }>;
 }) {
   const { locale } = await params;
+  const { next: rawNext } = await searchParams;
   if (!isLocale(locale)) notFound();
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: "auth" });
+
+  const safeNext =
+    typeof rawNext === "string" && rawNext.startsWith("/") && !rawNext.startsWith("//")
+      ? rawNext
+      : undefined;
 
   return (
     <div className="notch w-full max-w-md p-8" style={{ background: "var(--ash-1)" }}>
@@ -46,17 +54,30 @@ export default async function SignupPage({
       </p>
 
       <SignupForm
+        locale={locale}
+        next={safeNext}
         labels={{
           name: t("fields.fullName"),
           email: t("fields.email"),
           password: t("fields.password"),
           submit: t("signup.submit"),
           submitting: t("signup.submitting"),
+          google: t("login.google"),
+          googleStarting: t("login.googleStarting"),
+          or: t("login.or"),
         }}
       />
 
       <div className="mt-6 font-mono text-[11px] tracking-[0.15em] uppercase">
-        <Link href="/login" className="interactive" style={{ color: "var(--hell-red)" }}>
+        <Link
+          href={
+            (safeNext
+              ? `/login?next=${encodeURIComponent(safeNext)}`
+              : "/login") as never
+          }
+          className="interactive"
+          style={{ color: "var(--hell-red)" }}
+        >
           {t("signup.toLogin")}
         </Link>
       </div>

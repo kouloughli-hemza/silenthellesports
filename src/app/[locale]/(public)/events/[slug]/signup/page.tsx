@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { Link, isLocale } from "@/lib/i18n/routing";
@@ -47,6 +47,11 @@ export default async function EventSignupPage({ params }: SignupPageProps) {
 
   const t = await getTranslations({ locale, namespace: "events" });
   const sessionUser = await getSessionUser();
+  // Sign-in required to register. Send them to login with a return path.
+  if (!sessionUser) {
+    const next = `/${locale}/events/${slug}/signup`;
+    redirect(`/${locale}/login?next=${encodeURIComponent(next)}`);
+  }
   const signupCount = await getEventSignupCount(event.id);
 
   const title = pickTranslation(event.title, locale);

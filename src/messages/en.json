@@ -388,6 +388,9 @@
     "alsoLiveSub": "More drops in the queue.",
     "enterLabel": "Enter draw",
     "endsOn": "Ends {date}",
+    "signInTitle": "Sign in to enter.",
+    "signInSub": "We need an account so we can DM you if you win. Takes 5 seconds with Google.",
+    "signInCta": "SIGN IN TO ENTER →",
     "winnerNotified": "Winner notified via Discord.",
     "winnerLabel": "// WINNER",
     "backToGiveaways": "Back to giveaways",
@@ -461,11 +464,15 @@
     "login": {
       "eyebrow": "ENTER OPS",
       "title": "Sign In",
-      "sub": "Operators only. Use your registered email.",
+      "sub": "Sign in to enter giveaways, register for events, and check out.",
       "submit": "SIGN IN",
       "submitting": "AUTHENTICATING…",
       "forgot": "Forgot password",
-      "toSignup": "Need an account →"
+      "toSignup": "Need an account →",
+      "google": "Continue with Google",
+      "googleStarting": "Redirecting…",
+      "or": "OR",
+      "oauthError": "Google sign-in failed. Try again."
     },
     "signup": {
       "eyebrow": "RECRUIT",

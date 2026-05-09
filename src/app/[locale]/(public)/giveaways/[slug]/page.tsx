@@ -131,6 +131,9 @@ export default async function GiveawayDetailPage({
     h3: t("h3"),
     entry: t("entry"),
     entries: t("entries"),
+    signInTitle: t("signInTitle"),
+    signInSub: t("signInSub"),
+    signInCta: t("signInCta"),
   };
 
   const title = pickTranslation(giveaway.title, locale);
@@ -277,9 +280,11 @@ export default async function GiveawayDetailPage({
               />
               <ActiveEntryPanel
                 giveawayId={giveaway.id}
+                slug={giveaway.slug}
                 methods={methods}
                 locale={locale}
                 entryCount={entryCount}
+                signedIn={Boolean(session)}
                 sessionEmail={session?.email ?? null}
                 existingDiscord={existingEntry?.discordTag ?? null}
                 existingCompleted={existingCompleted}
@@ -430,9 +435,11 @@ export default async function GiveawayDetailPage({
 
 function ActiveEntryPanel({
   giveawayId,
+  slug,
   methods,
   locale,
   entryCount,
+  signedIn,
   sessionEmail,
   existingDiscord,
   existingCompleted,
@@ -440,9 +447,11 @@ function ActiveEntryPanel({
   formI18n,
 }: {
   giveawayId: string;
+  slug: string;
   methods: ReturnType<typeof parseEntryMethods>;
   locale: Locale;
   entryCount: number;
+  signedIn: boolean;
   sessionEmail: string | null;
   existingDiscord: string | null;
   existingCompleted: GiveawayEntryMethodType[];
@@ -463,6 +472,8 @@ function ActiveEntryPanel({
           methods={methods}
           locale={locale}
           initialPool={entryCount}
+          signedIn={signedIn}
+          signInNext={`/${locale}/giveaways/${slug}`}
           defaultEmail={sessionEmail}
           defaultDiscordTag={existingDiscord}
           initialCompleted={existingCompleted}

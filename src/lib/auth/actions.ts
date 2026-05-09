@@ -40,7 +40,9 @@ export async function signInAction(formData: FormData): Promise<Result<{ redirec
   return ok({ redirectTo: "/account" });
 }
 
-export async function signUpAction(formData: FormData): Promise<Result<{ message: string }>> {
+export async function signUpAction(
+  formData: FormData,
+): Promise<Result<{ signedIn: boolean; message: string }>> {
   const parsed = SignUpSchema.safeParse({
     email: formData.get("email"),
     password: formData.get("password"),
@@ -51,7 +53,7 @@ export async function signUpAction(formData: FormData): Promise<Result<{ message
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signUp({
+  const { data: signUpData, error } = await supabase.auth.signUp({
     email: parsed.data.email,
     password: parsed.data.password,
     options: {
@@ -59,13 +61,62 @@ export async function signUpAction(formData: FormData): Promise<Result<{ message
     },
   });
   if (error) return fail(error.message);
-  return ok({ message: "Account created. You can sign in now." });
+
+  // If Supabase returned a session, the user is signed in already (email
+  // confirmations are disabled). Otherwise — confirmations are on — the
+  // explicit signInWithPassword below also fails until they verify, so we
+  // fall back to a "check your inbox" message.
+  if (signUpData.session) {
+    return ok({ signedIn: true, message: "Signed in." });
+  }
+
+  const { error: signInErr } = await supabase.auth.signInWithPassword({
+    email: parsed.data.email,
+    password: parsed.data.password,
+  });
+  if (!signInErr) {
+    return ok({ signedIn: true, message: "Signed in." });
+  }
+  return ok({
+    signedIn: false,
+    message: "Account created. Check your inbox to confirm your email.",
+  });
 }
 
 export async function signOutAction(): Promise<void> {
   const supabase = await createClient();
   await supabase.auth.signOut();
   redirect("/");
+}
+
+// Returns the Google OAuth URL the client should navigate to. Supabase
+// handles the back-and-forth; our /auth/callback route swaps the code for
+// a session cookie and bounces to `next` (or /account if missing).
+export async function signInWithGoogleAction(
+  next?: string,
+): Promise<Result<{ url: string }>> {
+  const supabase = await createClient();
+  const h = await headers();
+  const origin =
+    h.get("origin") ?? h.get("x-forwarded-host") ?? "http://localhost:3000";
+  const base = origin.startsWith("http") ? origin : `https://${origin}`;
+  const safeNext =
+    typeof next === "string" && next.startsWith("/") && !next.startsWith("//")
+      ? next
+      : "/account";
+  const redirectTo = `${base}/auth/callback?next=${encodeURIComponent(safeNext)}`;
+
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo,
+      // Force Google's account chooser so users on shared devices see who
+      // they're signing in as.
+      queryParams: { prompt: "select_account" },
+    },
+  });
+  if (error || !data?.url) return fail("Couldn't start Google sign-in.");
+  return ok({ url: data.url });
 }
 
 const UpdateProfileSchema = z.object({

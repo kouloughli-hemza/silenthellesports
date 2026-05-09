@@ -183,6 +183,12 @@ export async function GiveawayHero({ locale }: GiveawayHeroProps) {
                 methods={entryMethods}
                 locale={locale}
                 initialPool={entries}
+                // Home is intentionally session-agnostic to stay CDN-cached;
+                // visitors land on the sign-in CTA and continue to /giveaways
+                // (or the slug page) where the full form is rendered with
+                // their real session.
+                signedIn={false}
+                signInNext={`/${locale}/giveaways/${giveaway.slug}`}
                 defaultEmail={null}
                 defaultDiscordTag={null}
                 initialCompleted={[]}
@@ -210,6 +216,9 @@ export async function GiveawayHero({ locale }: GiveawayHeroProps) {
                   h3: t("h3"),
                   entry: t("entry"),
                   entries: t("entries"),
+                  signInTitle: t("signInTitle"),
+                  signInSub: t("signInSub"),
+                  signInCta: t("signInCta"),
                 }}
               />
             </div>

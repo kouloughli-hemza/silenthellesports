@@ -22,6 +22,11 @@ interface GiveawayEntryFormProps {
   methods: GiveawayEntryMethod[];
   locale: Locale;
   initialPool: number;
+  // Whether the visitor has an authenticated session. Anonymous users see a
+  // sign-in CTA instead of the form because claimEntryAction will reject.
+  signedIn: boolean;
+  // Path the sign-in CTA should return to after auth.
+  signInNext: string;
   // Pre-fill from authenticated session.
   defaultEmail?: string | null;
   defaultDiscordTag?: string | null;
@@ -59,6 +64,9 @@ export interface GiveawayEntryFormI18n {
   h3: string;
   entry: string;
   entries: string;
+  signInTitle: string;
+  signInSub: string;
+  signInCta: string;
 }
 
 const METHOD_ICONS: Record<GiveawayEntryMethodType, string> = {
@@ -95,6 +103,8 @@ export function GiveawayEntryForm({
   methods,
   locale,
   initialPool,
+  signedIn,
+  signInNext,
   defaultEmail,
   defaultDiscordTag,
   initialCompleted,
@@ -201,6 +211,44 @@ export function GiveawayEntryForm({
   const discordValid = ClientDiscord.safeParse(discordTag).success;
   const canSubmit =
     completedCount > 0 && emailValid && discordValid && !pending && totalMethods > 0;
+
+  // Sign-in gate. Server action will reject anonymous claims regardless,
+  // but rendering the CTA spares the user a confusing "sign in to enter"
+  // toast after they fill out the form.
+  if (!signedIn) {
+    const safeNext =
+      signInNext.startsWith("/") && !signInNext.startsWith("//") ? signInNext : "/";
+    const localePrefix = locale === "ar" ? "/ar" : "/en";
+    const loginHref = `${localePrefix}/login?next=${encodeURIComponent(safeNext)}`;
+    return (
+      <div
+        className="flex flex-col items-start gap-4 p-6"
+        style={{ background: "var(--ash-3)", border: "1px solid rgba(230,0,19,0.25)" }}
+      >
+        <div className="flex items-center gap-2">
+          <span className="live-dot" />
+          <span
+            className="font-mono text-[11px] tracking-[0.3em] uppercase"
+            style={{ color: "var(--hell-red)" }}
+          >
+            {i18n.live}
+          </span>
+        </div>
+        <div className="font-display text-2xl leading-tight font-black uppercase italic md:text-3xl">
+          {i18n.signInTitle}
+        </div>
+        <p
+          className="text-sm leading-relaxed"
+          style={{ color: "rgba(245,240,232,0.7)" }}
+        >
+          {i18n.signInSub}
+        </p>
+        <a href={loginHref} className="btn-hell">
+          {i18n.signInCta}
+        </a>
+      </div>
+    );
+  }
 
   function toggleMethod(type: GiveawayEntryMethodType, url: string): void {
     setError(null);

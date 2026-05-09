@@ -50,6 +50,11 @@ export interface ClaimEntryResult {
 export async function claimEntryAction(
   input: ClaimEntryInput,
 ): Promise<Result<ClaimEntryResult>> {
+  // Sign-in gate — entries require an authenticated user. Server-side check
+  // so we can't be bypassed by a client that hides the prompt.
+  const sessionUser = await getSessionUser();
+  if (!sessionUser) return fail("Sign in to enter this giveaway.");
+
   const parsed = ClaimEntrySchema.safeParse(input);
   if (!parsed.success) {
     return fail("Check your details and try again.");
@@ -132,11 +137,9 @@ export async function claimEntryAction(
       methods.length,
     );
 
-    const session = await getSessionUser();
-    const userId =
-      session && session.email && session.email.toLowerCase() === data.email.toLowerCase()
-        ? session.id
-        : (session?.id ?? null);
+    // Reuse the session fetched at the top of the action — we already
+     // proved the user is signed in there. user_id is always non-null now.
+    const userId = sessionUser.id;
 
     const completedMethodsJson: Json = mergedMethods as unknown as Json;
 

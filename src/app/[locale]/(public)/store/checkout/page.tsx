@@ -5,6 +5,7 @@ import { notFound, redirect } from "next/navigation";
 import { SectionHeading } from "@/components/brand";
 import { CheckoutForm } from "@/components/public/store/checkout-form";
 import { isLocale } from "@/lib/i18n/routing";
+import { getSessionUser } from "@/lib/auth/session";
 import { readDetailedCart } from "@/lib/cart/detail";
 import { yalidine } from "@/services/yalidine";
 import { formatPrice, pickTranslation } from "@/types/domain";
@@ -28,6 +29,13 @@ export default async function CheckoutPage({ params }: CheckoutPageProps) {
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
   setRequestLocale(locale);
+
+  // Sign-in required to check out. Bounce them to login with a return path.
+  const sessionUser = await getSessionUser();
+  if (!sessionUser) {
+    const next = `/${locale}/store/checkout`;
+    redirect(`/${locale}/login?next=${encodeURIComponent(next)}`);
+  }
 
   const detailed = await readDetailedCart();
   if (detailed.lines.length === 0) {
