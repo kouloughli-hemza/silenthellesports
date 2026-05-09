@@ -111,7 +111,7 @@ export default async function EditGiveawayPage({
             className="mb-3 font-mono text-[10px] tracking-[0.3em] uppercase"
             style={{ color: "var(--signal-green)" }}
           >
-            // WINNER · DROP COMPLETED
+            {"// WINNER · DROP COMPLETED"}
           </div>
           {giveaway.winner_email ? (
             <div className="space-y-1.5">
