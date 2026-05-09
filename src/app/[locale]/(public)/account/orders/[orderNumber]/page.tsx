@@ -188,6 +188,14 @@ export default async function OrderDetailPage({ params }: OrderDetailProps) {
                           {item.variant_label_snapshot}
                         </div>
                       ) : null}
+                      {item.custom_name ? (
+                        <div
+                          className="mt-1 font-mono text-[10px] tracking-[0.25em] uppercase"
+                          style={{ color: "var(--ember)" }}
+                        >
+                          {`// PRINT NAME · ${item.custom_name}`}
+                        </div>
+                      ) : null}
                       <div
                         className="mt-1 font-mono text-[10px] tracking-[0.2em] uppercase"
                         style={{ color: "rgba(245,240,232,0.4)" }}

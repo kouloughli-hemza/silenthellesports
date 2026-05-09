@@ -501,6 +501,7 @@ export type Database = {
           images: string[];
           is_active: boolean;
           is_featured: boolean;
+          customization_enabled: boolean;
           weight_grams: number;
           display_order: number;
           created_at: string;
@@ -525,6 +526,7 @@ export type Database = {
           images?: string[];
           is_active?: boolean;
           is_featured?: boolean;
+          customization_enabled?: boolean;
           weight_grams?: number;
           display_order?: number;
           created_at?: string;
@@ -549,6 +551,7 @@ export type Database = {
           images?: string[];
           is_active?: boolean;
           is_featured?: boolean;
+          customization_enabled?: boolean;
           weight_grams?: number;
           display_order?: number;
           created_at?: string;
@@ -690,6 +693,7 @@ export type Database = {
           variant_id: string | null;
           product_name_snapshot: string;
           variant_label_snapshot: string | null;
+          custom_name: string | null;
           quantity: number;
           unit_price: number;
           line_total: number;
@@ -701,6 +705,7 @@ export type Database = {
           variant_id?: string | null;
           product_name_snapshot: string;
           variant_label_snapshot?: string | null;
+          custom_name?: string | null;
           quantity: number;
           unit_price: number;
           line_total: number;
@@ -712,6 +717,7 @@ export type Database = {
           variant_id?: string | null;
           product_name_snapshot?: string;
           variant_label_snapshot?: string | null;
+          custom_name?: string | null;
           quantity?: number;
           unit_price?: number;
           line_total?: number;

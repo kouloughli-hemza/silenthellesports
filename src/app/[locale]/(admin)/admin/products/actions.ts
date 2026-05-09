@@ -24,6 +24,7 @@ const Schema = z.object({
   images: z.array(z.string().trim().url()).max(10),
   is_active: z.boolean(),
   is_featured: z.boolean(),
+  customization_enabled: z.boolean(),
   weight_grams: z.number().int().min(1).max(50_000),
   display_order: z.number().int().min(0).max(9999),
 });

@@ -15,6 +15,7 @@ const EMPTY: ProductInput = {
   images: [],
   is_active: true,
   is_featured: false,
+  customization_enabled: false,
   weight_grams: 250,
   display_order: 0,
 };

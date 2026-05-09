@@ -19,6 +19,7 @@ export interface ProductPurchaseProps {
   productId: string;
   variants: ProductVariant[];
   isAr: boolean;
+  customizable: boolean;
   labels: {
     selectSize: string;
     noSizes: string;
@@ -28,13 +29,19 @@ export interface ProductPurchaseProps {
     pickSizeFirst: string;
     outOfStock: string;
     addError: string;
+    customNameLabel: string;
+    customNameHelp: string;
+    customNamePlaceholder: string;
   };
 }
+
+const CUSTOM_NAME_RE = /^[A-Z0-9 ]{0,12}$/;
 
 export function ProductPurchase({
   productId,
   variants,
   isAr,
+  customizable,
   labels,
 }: ProductPurchaseProps) {
   const sortedSized = useMemo(
@@ -52,6 +59,7 @@ export function ProductPurchase({
   const [selectedId, setSelectedId] = useState<string | null>(
     oneSizeVariant ? oneSizeVariant.id : null,
   );
+  const [customName, setCustomName] = useState("");
   const [pending, startTransition] = useTransition();
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -76,11 +84,18 @@ export function ProductPurchase({
   const handleClick = () => {
     if (disabled) return;
     setError(null);
+    const trimmedName = customName.trim().toUpperCase();
     startTransition(async () => {
       const variantId = selected ? selected.id : null;
-      const res = await addToCartAction(productId, variantId, 1);
+      const res = await addToCartAction(
+        productId,
+        variantId,
+        1,
+        customizable && trimmedName ? trimmedName : undefined,
+      );
       if (res.success) {
         setDone(true);
+        setCustomName("");
         window.setTimeout(() => setDone(false), 1800);
         window.dispatchEvent(new CustomEvent("cart-changed"));
       } else {
@@ -144,6 +159,39 @@ export function ProductPurchase({
           </div>
         ) : null}
       </div>
+
+      {customizable ? (
+        <div>
+          <label
+            htmlFor="custom-name"
+            className="font-mono block text-[10px] tracking-[0.25em] uppercase"
+            style={{ color: "rgba(245,240,232,0.5)" }}
+          >
+            {labels.customNameLabel}
+          </label>
+          <input
+            id="custom-name"
+            type="text"
+            inputMode="text"
+            autoComplete="off"
+            value={customName}
+            onChange={(e) => {
+              const next = e.target.value.toUpperCase();
+              if (CUSTOM_NAME_RE.test(next)) setCustomName(next);
+            }}
+            maxLength={12}
+            placeholder={labels.customNamePlaceholder}
+            className="field mt-3"
+            style={{ letterSpacing: "0.18em", fontFamily: "var(--font-jetbrains), monospace" }}
+          />
+          <div
+            className="mt-2 font-mono text-[10px] tracking-wider"
+            style={{ color: "rgba(245,240,232,0.45)" }}
+          >
+            {labels.customNameHelp}
+          </div>
+        </div>
+      ) : null}
 
       <button
         type="button"

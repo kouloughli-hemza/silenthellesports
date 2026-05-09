@@ -10,6 +10,7 @@ import { removeLineAction, updateLineAction } from "@/lib/cart/actions";
 interface CartLineRowProps {
   productId: string;
   variantId: string | null;
+  customName?: string;
   productName: string;
   variantLabel: string | null;
   unitPriceLabel: string;
@@ -26,6 +27,7 @@ interface CartLineRowProps {
     decrement: string;
     increment: string;
     oosInline: string;
+    customNameLabel: string;
   };
   hrefDetail: string;
 }
@@ -33,6 +35,7 @@ interface CartLineRowProps {
 export function CartLineRow({
   productId,
   variantId,
+  customName,
   productName,
   variantLabel,
   unitPriceLabel,
@@ -51,7 +54,7 @@ export function CartLineRow({
   const update = (next: number) => {
     if (pending) return;
     startTransition(async () => {
-      await updateLineAction(productId, variantId, next);
+      await updateLineAction(productId, variantId, next, customName);
       window.dispatchEvent(new CustomEvent("cart-changed"));
     });
   };
@@ -59,7 +62,7 @@ export function CartLineRow({
   const remove = () => {
     if (pending) return;
     startTransition(async () => {
-      await removeLineAction(productId, variantId);
+      await removeLineAction(productId, variantId, customName);
       window.dispatchEvent(new CustomEvent("cart-changed"));
     });
   };
@@ -108,6 +111,14 @@ export function CartLineRow({
             style={{ color: "rgba(245,240,232,0.5)" }}
           >
             {variantLabel}
+          </div>
+        ) : null}
+        {customName ? (
+          <div
+            className="font-mono mt-1 text-[10px] tracking-[0.25em] uppercase"
+            style={{ color: "var(--ember)" }}
+          >
+            {labels.customNameLabel} · {customName}
           </div>
         ) : null}
         <div

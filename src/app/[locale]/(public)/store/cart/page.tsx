@@ -72,9 +72,10 @@ export default async function CartPage({ params }: CartPageProps) {
                     : null;
                 return (
                   <CartLineRow
-                    key={`${dl.line.productId}:${dl.line.variantId ?? "none"}`}
+                    key={`${dl.line.productId}:${dl.line.variantId ?? "none"}:${dl.line.customName ?? ""}`}
                     productId={dl.line.productId}
                     variantId={dl.line.variantId}
+                    customName={dl.line.customName}
                     productName={name}
                     variantLabel={dl.variantLabel}
                     unitPriceLabel={formatPrice(dl.unitPrice, locale)}
@@ -92,6 +93,7 @@ export default async function CartPage({ params }: CartPageProps) {
                       decrement: t("cart.decrement"),
                       increment: t("cart.increment"),
                       oosInline: t("errors.oosVariant"),
+                      customNameLabel: tStore("customNameLabel"),
                     }}
                   />
                 );

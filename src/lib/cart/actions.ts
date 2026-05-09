@@ -6,6 +6,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
+import { createPublicClient } from "@/lib/supabase/public";
 import {
   addLine,
   clearCart as clearCartCookie,
@@ -21,15 +22,47 @@ const Uuid = z.string().uuid();
 const NullableUuid = z.string().uuid().nullable();
 const Quantity = z.number().int().min(1).max(99);
 
+// Jersey/etc. custom name validator. Empty becomes undefined so the cart
+// dedup key stays canonical.
+const CUSTOM_NAME_RE = /^[A-Z0-9 ]{1,12}$/;
+const OptionalCustomName = z
+  .string()
+  .trim()
+  .optional()
+  .transform((v) => (v && v.length > 0 ? v.toUpperCase() : undefined))
+  .refine((v) => v === undefined || CUSTOM_NAME_RE.test(v), {
+    message: "Custom name must be 1–12 letters/digits.",
+  });
+
 function revalidateCart(): void {
   revalidatePath("/[locale]/store/cart", "page");
   revalidatePath("/[locale]/store/checkout", "page");
+}
+
+// Resolve customization rules from the DB so a tampered client can't slap a
+// custom name on a product whose admin disabled it.
+async function gateCustomName(
+  productId: string,
+  raw: string | undefined,
+): Promise<string | undefined> {
+  const cleaned = OptionalCustomName.safeParse(raw);
+  if (!cleaned.success) return undefined;
+  if (!cleaned.data) return undefined;
+  const supabase = createPublicClient();
+  const { data } = await supabase
+    .from("products")
+    .select("customization_enabled")
+    .eq("id", productId)
+    .maybeSingle<{ customization_enabled: boolean }>();
+  if (!data?.customization_enabled) return undefined;
+  return cleaned.data;
 }
 
 export async function addToCartAction(
   productId: string,
   variantId: string | null,
   quantity = 1,
+  customName?: string,
 ): Promise<Result<{ count: number }>> {
   try {
     const pid = Uuid.safeParse(productId);
@@ -38,11 +71,13 @@ export async function addToCartAction(
     if (!pid.success || !vid.success || !qty.success) {
       return fail("Invalid cart input.");
     }
+    const safeName = await gateCustomName(pid.data, customName);
     const cart = await readCart();
     const next = addLine(cart, {
       productId: pid.data,
       variantId: vid.data,
       quantity: qty.data,
+      ...(safeName ? { customName: safeName } : {}),
     });
     await writeCart(next);
     revalidateCart();
@@ -56,6 +91,7 @@ export async function updateLineAction(
   productId: string,
   variantId: string | null,
   quantity: number,
+  customName?: string,
 ): Promise<Result<{ count: number }>> {
   try {
     const pid = Uuid.safeParse(productId);
@@ -65,7 +101,7 @@ export async function updateLineAction(
       return fail("Invalid cart input.");
     }
     const cart = await readCart();
-    const next = updateLineQuantity(cart, pid.data, vid.data, qty.data);
+    const next = updateLineQuantity(cart, pid.data, vid.data, qty.data, customName);
     await writeCart(next);
     revalidateCart();
     return ok({ count: totalQuantity(next) });
@@ -77,13 +113,14 @@ export async function updateLineAction(
 export async function removeLineAction(
   productId: string,
   variantId: string | null,
+  customName?: string,
 ): Promise<Result<{ count: number }>> {
   try {
     const pid = Uuid.safeParse(productId);
     const vid = NullableUuid.safeParse(variantId);
     if (!pid.success || !vid.success) return fail("Invalid cart input.");
     const cart = await readCart();
-    const next = removeLine(cart, pid.data, vid.data);
+    const next = removeLine(cart, pid.data, vid.data, customName);
     await writeCart(next);
     revalidateCart();
     return ok({ count: totalQuantity(next) });

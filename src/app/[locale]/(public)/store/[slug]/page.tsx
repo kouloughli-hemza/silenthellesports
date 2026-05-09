@@ -233,6 +233,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
               productId={product.id}
               variants={activeVariants}
               isAr={isAr}
+              customizable={product.customization_enabled}
               labels={{
                 selectSize: t("selectSize"),
                 noSizes: t("noSizes"),
@@ -242,6 +243,9 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
                 pickSizeFirst: t("pickSizeFirst"),
                 outOfStock: t("stockGone"),
                 addError: t("addError"),
+                customNameLabel: t("customNameLabel"),
+                customNameHelp: t("customNameHelp"),
+                customNamePlaceholder: t("customNamePlaceholder"),
               }}
             />
           </div>

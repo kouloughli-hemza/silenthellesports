@@ -93,6 +93,14 @@ export default async function AdminOrderDetailPage({
                         {it.variant_label_snapshot}
                       </div>
                     ) : null}
+                    {it.custom_name ? (
+                      <div
+                        className="font-mono text-[10px] tracking-[0.2em] uppercase"
+                        style={{ color: "var(--ember)" }}
+                      >
+                        {`// PRINT NAME · ${it.custom_name}`}
+                      </div>
+                    ) : null}
                   </td>
                   <td className="py-2 text-right font-mono text-xs">×{it.quantity}</td>
                   <td className="py-2 text-right font-mono text-xs">

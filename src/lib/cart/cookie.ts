@@ -7,7 +7,14 @@ import "server-only";
 
 import { cookies } from "next/headers";
 import { z } from "zod";
-import { CART_COOKIE, CART_COOKIE_MAX_AGE, EMPTY_CART, type Cart, type CartLine } from "./types";
+import {
+  CART_COOKIE,
+  CART_COOKIE_MAX_AGE,
+  EMPTY_CART,
+  customNameKey,
+  type Cart,
+  type CartLine,
+} from "./types";
 
 const CartSchema = z.object({
   lines: z.array(
@@ -15,6 +22,7 @@ const CartSchema = z.object({
       productId: z.string().uuid(),
       variantId: z.string().uuid().nullable(),
       quantity: z.number().int().min(1).max(99),
+      customName: z.string().max(12).optional(),
     }),
   ),
 });
@@ -58,10 +66,19 @@ export async function clearCart(): Promise<void> {
 
 // ----- pure operations on the Cart object -----
 
-export function addLine(cart: Cart, line: CartLine): Cart {
-  const existing = cart.lines.find(
-    (l) => l.productId === line.productId && l.variantId === line.variantId,
+// Lines are keyed on (productId, variantId, customName) so a buyer ordering
+// the same jersey + size with two different printed names ends up with two
+// distinct lines instead of one squashed-together line.
+function sameLine(a: CartLine, b: CartLine): boolean {
+  return (
+    a.productId === b.productId &&
+    a.variantId === b.variantId &&
+    customNameKey(a.customName) === customNameKey(b.customName)
   );
+}
+
+export function addLine(cart: Cart, line: CartLine): Cart {
+  const existing = cart.lines.find((l) => sameLine(l, line));
   if (existing) {
     return {
       lines: cart.lines.map((l) =>
@@ -74,10 +91,21 @@ export function addLine(cart: Cart, line: CartLine): Cart {
   return { lines: [...cart.lines, line] };
 }
 
-export function removeLine(cart: Cart, productId: string, variantId: string | null): Cart {
+export function removeLine(
+  cart: Cart,
+  productId: string,
+  variantId: string | null,
+  customName?: string,
+): Cart {
+  const target = customNameKey(customName);
   return {
     lines: cart.lines.filter(
-      (l) => !(l.productId === productId && l.variantId === variantId),
+      (l) =>
+        !(
+          l.productId === productId &&
+          l.variantId === variantId &&
+          customNameKey(l.customName) === target
+        ),
     ),
   };
 }
@@ -87,11 +115,15 @@ export function updateLineQuantity(
   productId: string,
   variantId: string | null,
   quantity: number,
+  customName?: string,
 ): Cart {
-  if (quantity <= 0) return removeLine(cart, productId, variantId);
+  if (quantity <= 0) return removeLine(cart, productId, variantId, customName);
+  const target = customNameKey(customName);
   return {
     lines: cart.lines.map((l) =>
-      l.productId === productId && l.variantId === variantId
+      l.productId === productId &&
+      l.variantId === variantId &&
+      customNameKey(l.customName) === target
         ? { ...l, quantity: Math.min(99, quantity) }
         : l,
     ),

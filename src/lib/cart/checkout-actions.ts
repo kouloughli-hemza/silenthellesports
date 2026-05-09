@@ -186,6 +186,9 @@ export async function placeOrderAction(
       product_name_snapshot:
         pickTranslation(dl.product.name, data.locale) || dl.product.slug,
       variant_label_snapshot: dl.variantLabel,
+      // Snapshot the custom print name (jersey, etc.) so the line stays
+      // recoverable even if the buyer's cookie is gone.
+      custom_name: dl.line.customName ?? null,
       quantity: dl.line.quantity,
       unit_price: dl.unitPrice,
       line_total: dl.lineTotal,

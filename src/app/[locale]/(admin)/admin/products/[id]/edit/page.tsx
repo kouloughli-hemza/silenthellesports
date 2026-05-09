@@ -31,6 +31,7 @@ export default async function EditProductPage({
     images: product.images ?? [],
     is_active: product.is_active,
     is_featured: product.is_featured,
+    customization_enabled: product.customization_enabled,
     weight_grams: product.weight_grams,
     display_order: product.display_order,
   };

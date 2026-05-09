@@ -194,6 +194,16 @@ export function ProductForm({ mode, id, locale, initial, players }: ProductFormP
               />
               <span style={{ color: "rgba(245,240,232,0.8)" }}>Featured</span>
             </label>
+            <label className="flex items-center gap-3 font-mono text-xs uppercase">
+              <input
+                type="checkbox"
+                checked={state.customization_enabled}
+                onChange={(e) => set("customization_enabled", e.target.checked)}
+              />
+              <span style={{ color: "rgba(245,240,232,0.8)" }}>
+                Allow custom name (jersey print)
+              </span>
+            </label>
           </div>
         </div>
       </Section>
