@@ -21,10 +21,11 @@ export async function StorePreview({ locale }: StorePreviewProps) {
     getSiteConfig("store.featured_collection_ends_at"),
   ]);
 
-  let products = await getActiveProducts({ limit: 4, featured: true });
-  if (products.length === 0) {
-    products = await getActiveProducts({ limit: 4 });
-  }
+  // Show the 4 most recently displayed products; admin can pin one with the
+  // is_featured flag to surface the NEW badge, but we don't filter by it.
+  // Featured-first filter used to leave the home empty when an admin had
+  // products without ever marking them featured.
+  const products = await getActiveProducts({ limit: 4 });
 
   return (
     <section
