@@ -11,5 +11,7 @@ export default async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: "/((?!api|_next|_vercel|.*\\..*).*)",
+  // `auth` is excluded so OAuth callbacks land on /auth/callback without
+  // the locale rewrite (Google + Supabase redirect to a fixed URL).
+  matcher: "/((?!api|auth|_next|_vercel|.*\\..*).*)",
 };
