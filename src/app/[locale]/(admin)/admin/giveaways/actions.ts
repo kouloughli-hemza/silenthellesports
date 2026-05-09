@@ -187,6 +187,8 @@ export async function drawWinnerAction(
     .update({
       status: "completed",
       winner_user_id: winner.user_id,
+      winner_email: winner.email,
+      winner_entry_id: winner.id,
       updated_at: new Date().toISOString(),
     } as never)
     .eq("id", id);

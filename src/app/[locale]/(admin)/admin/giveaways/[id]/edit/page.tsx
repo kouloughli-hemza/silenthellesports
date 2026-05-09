@@ -99,6 +99,57 @@ export default async function EditGiveawayPage({
 
       <GiveawayForm mode="edit" id={giveaway.id} locale={locale} initial={initial} />
 
+      {giveaway.status === "completed" ? (
+        <section
+          className="notch mt-8 p-5"
+          style={{
+            background: "var(--ash-1)",
+            border: "1px solid rgba(124,255,161,0.35)",
+          }}
+        >
+          <div
+            className="mb-3 font-mono text-[10px] tracking-[0.3em] uppercase"
+            style={{ color: "var(--signal-green)" }}
+          >
+            // WINNER · DROP COMPLETED
+          </div>
+          {giveaway.winner_email ? (
+            <div className="space-y-1.5">
+              <div
+                className="font-display text-2xl leading-tight font-black uppercase italic"
+                style={{ color: "var(--bone)" }}
+              >
+                {giveaway.winner_email}
+              </div>
+              {giveaway.winner_user_id ? (
+                <div
+                  className="font-mono text-[10px] tracking-[0.2em] uppercase"
+                  style={{ color: "rgba(245,240,232,0.55)" }}
+                >
+                  USER ID · {giveaway.winner_user_id}
+                </div>
+              ) : null}
+              {giveaway.winner_entry_id ? (
+                <div
+                  className="font-mono text-[10px] tracking-[0.2em] uppercase"
+                  style={{ color: "rgba(245,240,232,0.55)" }}
+                >
+                  ENTRY ID · {giveaway.winner_entry_id}
+                </div>
+              ) : null}
+            </div>
+          ) : (
+            <p
+              className="font-mono text-xs"
+              style={{ color: "rgba(245,240,232,0.6)" }}
+            >
+              This drop was completed before winner-email persistence shipped.
+              The pick is in the audit log.
+            </p>
+          )}
+        </section>
+      ) : null}
+
       <section className="notch mt-8 p-5" style={{ background: "var(--ash-1)" }}>
         <div className="mb-4 flex items-center justify-between gap-4">
           <div

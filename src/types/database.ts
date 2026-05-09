@@ -732,6 +732,8 @@ export type Database = {
           ends_at: string;
           status: "upcoming" | "active" | "drawing" | "completed";
           winner_user_id: string | null;
+          winner_email: string | null;
+          winner_entry_id: string | null;
           winner_announcement: Json;
           drop_number: number | null;
           created_at: string;
@@ -750,6 +752,8 @@ export type Database = {
           ends_at: string;
           status?: "upcoming" | "active" | "drawing" | "completed";
           winner_user_id?: string | null;
+          winner_email?: string | null;
+          winner_entry_id?: string | null;
           winner_announcement?: Json;
           drop_number?: number | null;
           created_at?: string;
@@ -768,6 +772,8 @@ export type Database = {
           ends_at?: string;
           status?: "upcoming" | "active" | "drawing" | "completed";
           winner_user_id?: string | null;
+          winner_email?: string | null;
+          winner_entry_id?: string | null;
           winner_announcement?: Json;
           drop_number?: number | null;
           created_at?: string;
