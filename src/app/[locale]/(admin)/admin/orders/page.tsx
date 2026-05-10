@@ -99,6 +99,33 @@ export default async function AdminOrdersPage({
         </Link>
       </form>
 
+      <div
+        className="mb-3 flex flex-wrap items-center gap-2 p-3 font-mono text-[11px] tracking-[0.05em]"
+        style={{
+          background: "var(--ash-1)",
+          border: "1px solid rgba(230,0,19,0.25)",
+          color: "rgba(245,240,232,0.7)",
+        }}
+      >
+        <span
+          className="font-mono text-[9px] tracking-[0.2em] uppercase"
+          style={{
+            background: "var(--hell-red)",
+            color: "var(--bone)",
+            padding: "1px 6px",
+            border: "1px solid var(--hell-red)",
+          }}
+        >
+          DUP
+        </span>
+        <span>
+          = this customer (matched by account or phone) has already ordered the
+          same product in another order. Useful for spotting abuse of free /
+          promo items — review before confirming. <strong>DUP×N</strong> means
+          N different products on this order are repeats.
+        </span>
+      </div>
+
       {rows.length === 0 ? (
         <div className="notch p-8 text-center" style={{ background: "var(--ash-1)" }}>
           <p className="font-mono text-xs" style={{ color: "rgba(245,240,232,0.6)" }}>
@@ -130,7 +157,23 @@ export default async function AdminOrdersPage({
                     <span className="font-mono">{o.order_number}</span>
                   </Td>
                   <Td>
-                    <div>{o.customer_name}</div>
+                    <div className="flex items-center gap-2">
+                      <span>{o.customer_name}</span>
+                      {o.duplicateProductIds.length > 0 ? (
+                        <span
+                          title={`This customer has ordered the same product ${o.duplicateProductIds.length === 1 ? "before" : "before (×" + o.duplicateProductIds.length + ")"} — possible promo abuse.`}
+                          className="font-mono text-[9px] tracking-[0.2em] uppercase"
+                          style={{
+                            background: "var(--hell-red)",
+                            color: "var(--bone)",
+                            padding: "1px 6px",
+                            border: "1px solid var(--hell-red)",
+                          }}
+                        >
+                          DUP{o.duplicateProductIds.length > 1 ? `×${o.duplicateProductIds.length}` : ""}
+                        </span>
+                      ) : null}
+                    </div>
                     <div
                       className="font-mono text-[10px]"
                       style={{ color: "rgba(245,240,232,0.5)" }}

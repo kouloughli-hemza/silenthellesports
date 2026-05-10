@@ -7,7 +7,7 @@ import { useMemo, useState, useTransition } from "react";
 import { addToCartAction } from "@/lib/cart/actions";
 import type { ProductVariant } from "@/types/domain";
 
-const SIZE_ORDER = ["XS", "S", "M", "L", "XL", "2XL", "3XL"];
+const SIZE_ORDER = ["XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL", "5XL"];
 
 function sizeRank(size: string | null): number {
   if (!size) return 99;

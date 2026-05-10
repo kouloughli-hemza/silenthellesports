@@ -2,8 +2,9 @@ import { setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { isLocale } from "@/lib/i18n/routing";
 import { listPlayers } from "@/lib/admin/data/players";
-import { getProduct } from "@/lib/admin/data/products";
+import { getProduct, listVariantsForProduct } from "@/lib/admin/data/products";
 import { ProductForm } from "../../product-form";
+import { VariantsEditor } from "../../variants-editor";
 import type { ProductInput } from "../../actions";
 
 export default async function EditProductPage({
@@ -17,6 +18,8 @@ export default async function EditProductPage({
 
   const [product, allPlayers] = await Promise.all([getProduct(id), listPlayers()]);
   if (!product) notFound();
+
+  const variants = await listVariantsForProduct(product.id);
 
   const name = (product.name ?? {}) as { en?: string; ar?: string };
   const description = (product.description ?? {}) as { en?: string; ar?: string };
@@ -59,6 +62,8 @@ export default async function EditProductPage({
         initial={initial}
         players={players}
       />
+
+      <VariantsEditor productId={product.id} variants={variants} />
     </div>
   );
 }

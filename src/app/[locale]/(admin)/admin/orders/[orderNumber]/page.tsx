@@ -1,7 +1,7 @@
 import { setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { isLocale, Link } from "@/lib/i18n/routing";
-import { getOrderByNumberAdmin } from "@/lib/admin/data/orders";
+import { findDuplicateOrdersForOrder, getOrderByNumberAdmin } from "@/lib/admin/data/orders";
 import { formatPrice, type Locale } from "@/types/domain";
 import { formatDateLong } from "@/lib/utils/format";
 import {
@@ -24,6 +24,7 @@ export default async function AdminOrderDetailPage({
   if (!order) notFound();
 
   const tLocale = locale as Locale;
+  const duplicateOrders = await findDuplicateOrdersForOrder(order.id);
 
   return (
     <div>
@@ -67,6 +68,116 @@ export default async function AdminOrderDetailPage({
           {order.status}
         </span>
       </div>
+
+      {duplicateOrders.length > 0 ? (
+        <section
+          className="notch mb-6 p-5"
+          style={{
+            background: "rgba(230,0,19,0.08)",
+            border: "1px solid var(--hell-red)",
+          }}
+        >
+          <div
+            className="mb-2 font-mono text-[10px] tracking-[0.3em] uppercase"
+            style={{ color: "var(--hell-red)" }}
+          >
+            {`// DUPLICATE PRODUCTS — ${duplicateOrders.length} OTHER ORDER${duplicateOrders.length === 1 ? "" : "S"}`}
+          </div>
+          <p
+            className="mb-4 max-w-3xl font-mono text-[11px] leading-relaxed"
+            style={{ color: "rgba(245,240,232,0.75)" }}
+          >
+            This customer (matched by {order.user_id ? "account" : "phone"}) has
+            other orders containing the same product(s) as this one. Common with
+            free / promo items — review and cancel any duplicates you don&apos;t
+            want to fulfill.
+          </p>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr style={{ borderBottom: "1px solid rgba(230,0,19,0.35)" }}>
+                  <th
+                    className="px-2 py-2 text-left font-mono text-[10px] tracking-[0.2em] uppercase"
+                    style={{ color: "rgba(245,240,232,0.6)" }}
+                  >
+                    Order #
+                  </th>
+                  <th
+                    className="px-2 py-2 text-left font-mono text-[10px] tracking-[0.2em] uppercase"
+                    style={{ color: "rgba(245,240,232,0.6)" }}
+                  >
+                    Status
+                  </th>
+                  <th
+                    className="px-2 py-2 text-left font-mono text-[10px] tracking-[0.2em] uppercase"
+                    style={{ color: "rgba(245,240,232,0.6)" }}
+                  >
+                    Created
+                  </th>
+                  <th
+                    className="px-2 py-2 text-left font-mono text-[10px] tracking-[0.2em] uppercase"
+                    style={{ color: "rgba(245,240,232,0.6)" }}
+                  >
+                    Total
+                  </th>
+                  <th
+                    className="px-2 py-2 text-left font-mono text-[10px] tracking-[0.2em] uppercase"
+                    style={{ color: "rgba(245,240,232,0.6)" }}
+                  >
+                    Same product(s)
+                  </th>
+                  <th className="px-2 py-2"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {duplicateOrders.map((d) => (
+                  <tr
+                    key={d.id}
+                    style={{ borderBottom: "1px solid rgba(245,240,232,0.06)" }}
+                  >
+                    <td className="px-2 py-2 font-mono text-xs">
+                      {d.order_number}
+                    </td>
+                    <td className="px-2 py-2">
+                      <span
+                        className="font-mono text-[10px] tracking-[0.2em] uppercase"
+                        style={{
+                          background: "rgba(10,10,10,0.5)",
+                          color: "var(--bone)",
+                          border: "1px solid rgba(245,240,232,0.2)",
+                          padding: "2px 8px",
+                        }}
+                      >
+                        {d.status}
+                      </span>
+                    </td>
+                    <td className="px-2 py-2 font-mono text-[11px]">
+                      {formatDateLong(d.created_at, tLocale)}
+                    </td>
+                    <td className="px-2 py-2 font-mono text-xs">
+                      {formatPrice(Number(d.total), tLocale, d.currency)}
+                    </td>
+                    <td className="px-2 py-2 text-xs">
+                      {d.sharedProductNames.length > 0
+                        ? d.sharedProductNames.join(", ")
+                        : "—"}
+                    </td>
+                    <td className="px-2 py-2 text-right">
+                      <Link
+                        href={`/admin/orders/${d.order_number}` as never}
+                        className="font-mono text-[10px] tracking-[0.2em] uppercase"
+                        style={{ color: "var(--hell-red)" }}
+                      >
+                        OPEN →
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      ) : null}
 
       <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
         <section className="notch p-6" style={{ background: "var(--ash-1)" }}>

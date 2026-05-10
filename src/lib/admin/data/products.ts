@@ -28,3 +28,17 @@ export async function getProduct(id: string): Promise<Product | null> {
   if (error) throw new Error(`getProduct: ${error.message}`);
   return data;
 }
+
+export type ProductVariant = Row<"product_variants">;
+
+export async function listVariantsForProduct(productId: string): Promise<ProductVariant[]> {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("product_variants")
+    .select("*")
+    .eq("product_id", productId)
+    .order("size", { ascending: true })
+    .order("created_at", { ascending: true });
+  if (error) throw new Error(`listVariantsForProduct: ${error.message}`);
+  return (data ?? []) as ProductVariant[];
+}
