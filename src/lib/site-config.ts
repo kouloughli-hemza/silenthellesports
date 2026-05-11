@@ -38,6 +38,19 @@ const ConfigSchemas = {
   sponsors: z.array(z.string()),
   "shipping.from_wilaya_code": z.number().int().min(1).max(58),
   "tactics.enabled": z.boolean(),
+  "payment.uc_accounts": z.object({
+    baridimob: z.object({
+      account_number: z.string(),
+      account_name: z.string(),
+      extra: z.string(),
+    }),
+    ccp: z.object({
+      account_number: z.string(),
+      account_name: z.string(),
+      rip_key: z.string(),
+      extra: z.string(),
+    }),
+  }),
 } as const;
 
 type ConfigKey = keyof typeof ConfigSchemas;
@@ -65,6 +78,10 @@ const DEFAULTS: { [K in ConfigKey]: ConfigValue<K> } = {
   sponsors: ["Logitech G", "Red Bull Gaming", "HyperX", "Victrix", "Monster Energy"],
   "shipping.from_wilaya_code": 16,
   "tactics.enabled": true,
+  "payment.uc_accounts": {
+    baridimob: { account_number: "", account_name: "", extra: "" },
+    ccp: { account_number: "", account_name: "", rip_key: "", extra: "" },
+  },
 };
 
 // Tag every config read so admin updates can revalidateTag(`site-config:${key}`)

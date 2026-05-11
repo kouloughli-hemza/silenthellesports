@@ -13,23 +13,39 @@ export default async function AdminSiteConfigPage({
   if (!isLocale(locale)) notFound();
   setRequestLocale(locale);
 
-  const [headline, tagline, stats, season, discordUrl, discordCount, youtube, instagram, tiktok, drop, giveDrop, sponsors, fromWilaya, featuredEnds] =
-    await Promise.all([
-      getSiteConfig("hero.headline"),
-      getSiteConfig("hero.tagline"),
-      getSiteConfig("hero.stats"),
-      getSiteConfig("hero.season"),
-      getSiteConfig("socials.discord_url"),
-      getSiteConfig("socials.discord_member_count"),
-      getSiteConfig("socials.youtube_channel"),
-      getSiteConfig("socials.instagram_handle"),
-      getSiteConfig("socials.tiktok_handle"),
-      getSiteConfig("store.current_drop"),
-      getSiteConfig("giveaway.current_drop"),
-      getSiteConfig("sponsors"),
-      getSiteConfig("shipping.from_wilaya_code"),
-      getSiteConfig("store.featured_collection_ends_at"),
-    ]);
+  const [
+    headline,
+    tagline,
+    stats,
+    season,
+    discordUrl,
+    discordCount,
+    youtube,
+    instagram,
+    tiktok,
+    drop,
+    giveDrop,
+    sponsors,
+    fromWilaya,
+    featuredEnds,
+    ucAccounts,
+  ] = await Promise.all([
+    getSiteConfig("hero.headline"),
+    getSiteConfig("hero.tagline"),
+    getSiteConfig("hero.stats"),
+    getSiteConfig("hero.season"),
+    getSiteConfig("socials.discord_url"),
+    getSiteConfig("socials.discord_member_count"),
+    getSiteConfig("socials.youtube_channel"),
+    getSiteConfig("socials.instagram_handle"),
+    getSiteConfig("socials.tiktok_handle"),
+    getSiteConfig("store.current_drop"),
+    getSiteConfig("giveaway.current_drop"),
+    getSiteConfig("sponsors"),
+    getSiteConfig("shipping.from_wilaya_code"),
+    getSiteConfig("store.featured_collection_ends_at"),
+    getSiteConfig("payment.uc_accounts"),
+  ]);
 
   return (
     <div>
@@ -68,6 +84,7 @@ export default async function AdminSiteConfigPage({
           sponsors,
           fromWilaya,
           featuredEnds,
+          ucAccounts,
         }}
       />
     </div>

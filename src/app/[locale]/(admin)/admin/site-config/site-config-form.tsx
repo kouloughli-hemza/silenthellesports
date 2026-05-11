@@ -19,6 +19,15 @@ interface Initial {
   sponsors: string[];
   fromWilaya: number;
   featuredEnds: string;
+  ucAccounts: {
+    baridimob: { account_number: string; account_name: string; extra: string };
+    ccp: {
+      account_number: string;
+      account_name: string;
+      rip_key: string;
+      extra: string;
+    };
+  };
 }
 
 export function SiteConfigForm({ initial }: { initial: Initial }) {
@@ -240,6 +249,165 @@ export function SiteConfigForm({ initial }: { initial: Initial }) {
             onChange={(e) => set("fromWilaya", Number(e.target.value) || 16)}
           />
         </Field>
+      </Section>
+
+      <Section title="UC PAYMENT ACCOUNTS">
+        <p
+          className="mb-3 font-mono text-[10px] tracking-[0.15em] uppercase"
+          style={{ color: "rgba(245,240,232,0.5)" }}
+        >
+          {`// Shown on /uc-recharge so customers know where to send the money.`}
+        </p>
+        <div className="space-y-4">
+          <div>
+            <div
+              className="mb-2 font-mono text-[11px] tracking-[0.2em] uppercase"
+              style={{ color: "var(--ember)" }}
+            >
+              BARIDIMOB
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <Field label="Account number / phone">
+                <input
+                  className="field"
+                  value={state.ucAccounts.baridimob.account_number}
+                  onChange={(e) =>
+                    setState((s) => ({
+                      ...s,
+                      ucAccounts: {
+                        ...s.ucAccounts,
+                        baridimob: {
+                          ...s.ucAccounts.baridimob,
+                          account_number: e.target.value,
+                        },
+                      },
+                    }))
+                  }
+                  placeholder="00799999 0123456789"
+                />
+              </Field>
+              <Field label="Account holder name">
+                <input
+                  className="field"
+                  value={state.ucAccounts.baridimob.account_name}
+                  onChange={(e) =>
+                    setState((s) => ({
+                      ...s,
+                      ucAccounts: {
+                        ...s.ucAccounts,
+                        baridimob: {
+                          ...s.ucAccounts.baridimob,
+                          account_name: e.target.value,
+                        },
+                      },
+                    }))
+                  }
+                  placeholder="SILENT HELL ESPORTS"
+                />
+              </Field>
+            </div>
+            <Field label="Notes / extra (optional)">
+              <input
+                className="field"
+                value={state.ucAccounts.baridimob.extra}
+                onChange={(e) =>
+                  setState((s) => ({
+                    ...s,
+                    ucAccounts: {
+                      ...s.ucAccounts,
+                      baridimob: {
+                        ...s.ucAccounts.baridimob,
+                        extra: e.target.value,
+                      },
+                    },
+                  }))
+                }
+                placeholder="anything else customers should know"
+              />
+            </Field>
+          </div>
+
+          <div>
+            <div
+              className="mb-2 font-mono text-[11px] tracking-[0.2em] uppercase"
+              style={{ color: "var(--ember)" }}
+            >
+              CCP / POSTAL
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <Field label="CCP number">
+                <input
+                  className="field"
+                  value={state.ucAccounts.ccp.account_number}
+                  onChange={(e) =>
+                    setState((s) => ({
+                      ...s,
+                      ucAccounts: {
+                        ...s.ucAccounts,
+                        ccp: {
+                          ...s.ucAccounts.ccp,
+                          account_number: e.target.value,
+                        },
+                      },
+                    }))
+                  }
+                  placeholder="1234567 89"
+                />
+              </Field>
+              <Field label="Clé (RIP key)">
+                <input
+                  className="field"
+                  value={state.ucAccounts.ccp.rip_key}
+                  onChange={(e) =>
+                    setState((s) => ({
+                      ...s,
+                      ucAccounts: {
+                        ...s.ucAccounts,
+                        ccp: { ...s.ucAccounts.ccp, rip_key: e.target.value },
+                      },
+                    }))
+                  }
+                  placeholder="12"
+                />
+              </Field>
+              <Field label="Account holder name">
+                <input
+                  className="field"
+                  value={state.ucAccounts.ccp.account_name}
+                  onChange={(e) =>
+                    setState((s) => ({
+                      ...s,
+                      ucAccounts: {
+                        ...s.ucAccounts,
+                        ccp: {
+                          ...s.ucAccounts.ccp,
+                          account_name: e.target.value,
+                        },
+                      },
+                    }))
+                  }
+                  placeholder="SILENT HELL ESPORTS"
+                />
+              </Field>
+            </div>
+            <Field label="Notes / extra (optional)">
+              <input
+                className="field"
+                value={state.ucAccounts.ccp.extra}
+                onChange={(e) =>
+                  setState((s) => ({
+                    ...s,
+                    ucAccounts: {
+                      ...s.ucAccounts,
+                      ccp: { ...s.ucAccounts.ccp, extra: e.target.value },
+                    },
+                  }))
+                }
+                placeholder="anything else customers should know"
+              />
+            </Field>
+          </div>
+        </div>
       </Section>
 
       <Section title="SPONSORS">

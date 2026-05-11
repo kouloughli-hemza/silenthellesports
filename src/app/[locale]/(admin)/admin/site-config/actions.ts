@@ -22,6 +22,20 @@ const Headline = z.object({
   l4: Translated,
 });
 
+const UcAccounts = z.object({
+  baridimob: z.object({
+    account_number: z.string(),
+    account_name: z.string(),
+    extra: z.string(),
+  }),
+  ccp: z.object({
+    account_number: z.string(),
+    account_name: z.string(),
+    rip_key: z.string(),
+    extra: z.string(),
+  }),
+});
+
 const Schema = z.object({
   headline: Headline,
   tagline: Translated,
@@ -37,6 +51,7 @@ const Schema = z.object({
   sponsors: z.array(z.string()),
   fromWilaya: z.number().int().min(1).max(58),
   featuredEnds: z.string(),
+  ucAccounts: UcAccounts,
 });
 
 export type SaveInput = z.infer<typeof Schema>;
@@ -64,6 +79,7 @@ export async function saveSiteConfigAction(
     { key: "sponsors", value: data.sponsors },
     { key: "shipping.from_wilaya_code", value: data.fromWilaya },
     { key: "store.featured_collection_ends_at", value: data.featuredEnds },
+    { key: "payment.uc_accounts", value: data.ucAccounts },
   ];
 
   const supabase = createAdminClient();

@@ -2,8 +2,11 @@ import { setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { isLocale, Link } from "@/lib/i18n/routing";
 import { getSessionUser } from "@/lib/auth/session";
+import { getSiteConfig } from "@/lib/site-config";
 import { getActiveUcPackages } from "@/lib/uc/data";
 import { UcRechargeForm } from "./uc-recharge-form";
+
+type UcAccounts = Awaited<ReturnType<typeof getSiteConfig<"payment.uc_accounts">>>;
 
 export const dynamic = "force-dynamic";
 
@@ -17,8 +20,11 @@ export default async function UcRechargePage({
   setRequestLocale(locale);
 
   const isAr = locale === "ar";
-  const session = await getSessionUser();
-  const packages = await getActiveUcPackages();
+  const [session, packages, ucAccounts] = await Promise.all([
+    getSessionUser(),
+    getActiveUcPackages(),
+    getSiteConfig("payment.uc_accounts"),
+  ]);
 
   const formI18n = isAr
     ? {
@@ -108,7 +114,7 @@ export default async function UcRechargePage({
         </div>
       </header>
 
-      <PaymentInstructions isAr={isAr} />
+      <PaymentInstructions isAr={isAr} ucAccounts={ucAccounts} />
 
       {session ? (
         <div
@@ -131,7 +137,18 @@ export default async function UcRechargePage({
   );
 }
 
-function PaymentInstructions({ isAr }: { isAr: boolean }) {
+function PaymentInstructions({
+  isAr,
+  ucAccounts,
+}: {
+  isAr: boolean;
+  ucAccounts: UcAccounts;
+}) {
+  const baridi = ucAccounts.baridimob;
+  const ccp = ucAccounts.ccp;
+  const hasBaridi = baridi.account_number.trim().length > 0;
+  const hasCcp = ccp.account_number.trim().length > 0;
+
   return (
     <section
       className="notch mb-8 p-5"
@@ -152,12 +169,12 @@ function PaymentInstructions({ isAr }: { isAr: boolean }) {
       >
         <li>
           {isAr
-            ? "اختر باقة UC، وأرسل سعرها بالدينار إلى حسابنا (BaridiMob أو CCP)."
-            : "Pick a UC package and send the price in DZD to our account (BaridiMob or CCP)."}
+            ? "اختر باقة UC، وأرسل سعرها بالدينار إلى أحد الحسابات أدناه."
+            : "Pick a UC package and send the price in DZD to one of the accounts below."}
         </li>
         <li>
           {isAr
-            ? "أرفق صورة لإثبات الدفع، ومعرّف PUBG، ورقم واتساب."
+            ? "أرفق صورة إثبات الدفع، ومعرّف PUBG، ورقم واتساب."
             : "Upload your payment proof, your PUBG ID, and a WhatsApp number."}
         </li>
         <li>
@@ -166,15 +183,127 @@ function PaymentInstructions({ isAr }: { isAr: boolean }) {
             : "We'll contact you after verifying payment, then deliver UC in-game."}
         </li>
       </ol>
-      <p
-        className="mt-3 font-mono text-[10px]"
-        style={{ color: "rgba(245,240,232,0.55)" }}
-      >
-        {isAr
-          ? "ستجد تفاصيل الحساب (BaridiMob / CCP) في صفحة التواصل أو على واتساب الإدارة."
-          : "Account details (BaridiMob / CCP) are listed on the contact page — or message us on WhatsApp."}
-      </p>
+
+      {hasBaridi || hasCcp ? (
+        <div className="mt-5 grid gap-3 md:grid-cols-2">
+          {hasBaridi ? (
+            <AccountCard
+              title="BARIDIMOB"
+              rows={[
+                {
+                  label: isAr ? "رقم الحساب" : "Account number",
+                  value: baridi.account_number,
+                },
+                ...(baridi.account_name
+                  ? [
+                      {
+                        label: isAr ? "اسم صاحب الحساب" : "Account name",
+                        value: baridi.account_name,
+                      },
+                    ]
+                  : []),
+                ...(baridi.extra
+                  ? [
+                      {
+                        label: isAr ? "ملاحظة" : "Note",
+                        value: baridi.extra,
+                      },
+                    ]
+                  : []),
+              ]}
+            />
+          ) : null}
+
+          {hasCcp ? (
+            <AccountCard
+              title="CCP / POSTAL"
+              rows={[
+                {
+                  label: isAr ? "رقم CCP" : "CCP number",
+                  value: ccp.account_number,
+                },
+                ...(ccp.rip_key
+                  ? [
+                      {
+                        label: isAr ? "المفتاح (clé)" : "Clé (key)",
+                        value: ccp.rip_key,
+                      },
+                    ]
+                  : []),
+                ...(ccp.account_name
+                  ? [
+                      {
+                        label: isAr ? "اسم صاحب الحساب" : "Account name",
+                        value: ccp.account_name,
+                      },
+                    ]
+                  : []),
+                ...(ccp.extra
+                  ? [
+                      {
+                        label: isAr ? "ملاحظة" : "Note",
+                        value: ccp.extra,
+                      },
+                    ]
+                  : []),
+              ]}
+            />
+          ) : null}
+        </div>
+      ) : (
+        <p
+          className="mt-3 font-mono text-[10px]"
+          style={{ color: "rgba(245,240,232,0.55)" }}
+        >
+          {isAr
+            ? "لم تُضف تفاصيل الحساب بعد — تواصل معنا على واتساب لمعرفة كيفية الدفع."
+            : "Account details aren't published yet — contact us on WhatsApp for payment instructions."}
+        </p>
+      )}
     </section>
+  );
+}
+
+function AccountCard({
+  title,
+  rows,
+}: {
+  title: string;
+  rows: { label: string; value: string }[];
+}) {
+  return (
+    <div
+      className="p-4"
+      style={{
+        background: "var(--ash-3)",
+        border: "1px solid rgba(230,0,19,0.25)",
+      }}
+    >
+      <div
+        className="mb-3 font-mono text-[11px] tracking-[0.25em] uppercase"
+        style={{ color: "var(--hell-red)" }}
+      >
+        {title}
+      </div>
+      <dl className="space-y-2">
+        {rows.map((r) => (
+          <div key={r.label} className="flex items-start justify-between gap-4">
+            <dt
+              className="font-mono text-[10px] tracking-[0.2em] uppercase"
+              style={{ color: "rgba(245,240,232,0.5)" }}
+            >
+              {r.label}
+            </dt>
+            <dd
+              className="font-mono text-xs"
+              style={{ color: "var(--bone)", userSelect: "text" }}
+            >
+              {r.value}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </div>
   );
 }
 
