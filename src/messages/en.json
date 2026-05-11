@@ -68,6 +68,7 @@
     "store": "Store",
     "events": "Events",
     "giveaways": "Giveaways",
+    "ucRecharge": "UC Recharge",
     "contact": "Contact",
     "account": "Account",
     "menu": "Menu",
@@ -675,6 +676,8 @@
     "nav": {
       "overview": "Overview",
       "orders": "Orders",
+      "ucRecharges": "UC Requests",
+      "ucPackages": "UC Packages",
       "events": "Events",
       "giveaways": "Giveaways",
       "products": "Products",
