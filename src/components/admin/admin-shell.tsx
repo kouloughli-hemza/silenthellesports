@@ -16,6 +16,8 @@ interface NavItem {
   href:
     | "/admin"
     | "/admin/orders"
+    | "/admin/uc-recharges"
+    | "/admin/uc-packages"
     | "/admin/events"
     | "/admin/giveaways"
     | "/admin/products"
@@ -35,6 +37,8 @@ interface NavItem {
 const NAV: NavItem[] = [
   { href: "/admin", labelKey: "overview" },
   { href: "/admin/orders", labelKey: "orders" },
+  { href: "/admin/uc-recharges", labelKey: "ucRecharges" },
+  { href: "/admin/uc-packages", labelKey: "ucPackages" },
   { href: "/admin/events", labelKey: "events" },
   { href: "/admin/giveaways", labelKey: "giveaways" },
   { href: "/admin/products", labelKey: "products" },

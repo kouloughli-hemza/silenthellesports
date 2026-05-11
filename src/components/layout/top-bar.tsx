@@ -9,8 +9,15 @@ import { LangSwitcher } from "./lang-switcher";
 import { DiscordIcon } from "./discord-icon";
 
 interface NavItem {
-  key: "home" | "roster" | "store" | "events" | "giveaways" | "contact";
-  href: "/" | "/roster" | "/store" | "/events" | "/giveaways" | "/contact";
+  key: "home" | "roster" | "store" | "events" | "giveaways" | "ucRecharge" | "contact";
+  href:
+    | "/"
+    | "/roster"
+    | "/store"
+    | "/events"
+    | "/giveaways"
+    | "/uc-recharge"
+    | "/contact";
 }
 
 const ITEMS: NavItem[] = [
@@ -19,6 +26,7 @@ const ITEMS: NavItem[] = [
   { key: "store", href: "/store" },
   { key: "events", href: "/events" },
   { key: "giveaways", href: "/giveaways" },
+  { key: "ucRecharge", href: "/uc-recharge" },
   { key: "contact", href: "/contact" },
 ];
 

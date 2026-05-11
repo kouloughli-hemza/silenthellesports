@@ -331,6 +331,126 @@ export type Database = {
         };
         Relationships: [];
       };
+      uc_packages: {
+        Row: {
+          id: string;
+          uc_amount: number;
+          bonus_uc: number;
+          price_dzd: number;
+          label: string | null;
+          is_active: boolean;
+          display_order: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          uc_amount: number;
+          bonus_uc?: number;
+          price_dzd: number;
+          label?: string | null;
+          is_active?: boolean;
+          display_order?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          uc_amount?: number;
+          bonus_uc?: number;
+          price_dzd?: number;
+          label?: string | null;
+          is_active?: boolean;
+          display_order?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      uc_recharge_requests: {
+        Row: {
+          id: string;
+          request_number: string;
+          user_id: string;
+          package_id: string;
+          uc_amount_snapshot: number;
+          bonus_uc_snapshot: number;
+          price_dzd_snapshot: number;
+          pubg_id: string;
+          ign: string;
+          payment_method: "baridimob" | "ccp";
+          transfer_code: string | null;
+          proof_url: string;
+          whatsapp_phone: string;
+          email: string | null;
+          status:
+            | "pending"
+            | "payment_received"
+            | "delivered"
+            | "rejected"
+            | "cancelled";
+          admin_notes: string | null;
+          delivery_screenshot_url: string | null;
+          rejection_reason: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          request_number?: string;
+          user_id: string;
+          package_id: string;
+          uc_amount_snapshot: number;
+          bonus_uc_snapshot?: number;
+          price_dzd_snapshot: number;
+          pubg_id: string;
+          ign: string;
+          payment_method: "baridimob" | "ccp";
+          transfer_code?: string | null;
+          proof_url: string;
+          whatsapp_phone: string;
+          email?: string | null;
+          status?:
+            | "pending"
+            | "payment_received"
+            | "delivered"
+            | "rejected"
+            | "cancelled";
+          admin_notes?: string | null;
+          delivery_screenshot_url?: string | null;
+          rejection_reason?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          request_number?: string;
+          user_id?: string;
+          package_id?: string;
+          uc_amount_snapshot?: number;
+          bonus_uc_snapshot?: number;
+          price_dzd_snapshot?: number;
+          pubg_id?: string;
+          ign?: string;
+          payment_method?: "baridimob" | "ccp";
+          transfer_code?: string | null;
+          proof_url?: string;
+          whatsapp_phone?: string;
+          email?: string | null;
+          status?:
+            | "pending"
+            | "payment_received"
+            | "delivered"
+            | "rejected"
+            | "cancelled";
+          admin_notes?: string | null;
+          delivery_screenshot_url?: string | null;
+          rejection_reason?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       team_stats: {
         Row: {
           id: string;
