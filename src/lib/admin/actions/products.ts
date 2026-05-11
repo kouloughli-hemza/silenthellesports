@@ -6,6 +6,7 @@ import { requireAdmin } from "@/lib/admin/guard";
 import { recordAudit } from "@/lib/admin/audit";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { slugify } from "@/lib/utils/slugify";
+import { identifyImage } from "@/lib/utils/image-bytes";
 import { fail, ok, type Result } from "@/types/domain";
 import type { Insert, Update, Row } from "@/types/database";
 
@@ -20,12 +21,6 @@ const PRODUCT_CATEGORIES = [
   "other",
 ] as const;
 
-const ALLOWED_IMAGE_TYPES = [
-  "image/png",
-  "image/jpeg",
-  "image/webp",
-  "image/avif",
-] as const;
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 
 const TranslatedSchema = z.object({
@@ -438,33 +433,21 @@ export async function uploadProductImageAction(
   if (!(file instanceof File)) return fail("No file provided.");
   if (file.size <= 0) return fail("Empty file.");
   if (file.size > MAX_IMAGE_BYTES) return fail("File exceeds 5MB.");
-  if (!ALLOWED_IMAGE_TYPES.includes(file.type as (typeof ALLOWED_IMAGE_TYPES)[number])) {
-    return fail("Only PNG, JPEG, WEBP, or AVIF images are allowed.");
-  }
+
+  // Sniff magic bytes — don't trust the browser Content-Type.
+  const buffer = Buffer.from(await file.arrayBuffer());
+  const identified = identifyImage(buffer, { allow: ["png", "jpeg", "webp", "avif"] });
+  if (!identified) return fail("Only PNG, JPEG, WebP, or AVIF images are allowed.");
 
   const productId = String(formData.get("product_id") ?? "misc");
-  const ext = (() => {
-    switch (file.type) {
-      case "image/png":
-        return "png";
-      case "image/jpeg":
-        return "jpg";
-      case "image/webp":
-        return "webp";
-      case "image/avif":
-        return "avif";
-      default:
-        return "bin";
-    }
-  })();
-  const path = `${productId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+  const path = `${productId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${identified.ext}`;
 
   const supabase = createAdminClient();
   const { error: upErr } = await supabase.storage
     .from("products")
-    .upload(path, file, {
+    .upload(path, buffer, {
       cacheControl: "3600",
-      contentType: file.type,
+      contentType: identified.mime,
       upsert: false,
     });
   if (upErr) return fail(upErr.message);

@@ -4,19 +4,11 @@ import { randomUUID } from "node:crypto";
 import { requireAdmin } from "@/lib/admin/guard";
 import { recordAudit } from "@/lib/admin/audit";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { identifyImage } from "@/lib/utils/image-bytes";
 import { fail, ok, type Result } from "@/types/domain";
 import { UPLOAD_BUCKETS, type UploadBucket } from "@/lib/admin/upload-types";
 
-const ALLOWED_MIME = new Set(["image/png", "image/jpeg", "image/webp", "image/avif", "image/gif"]);
 const MAX_BYTES = 5 * 1024 * 1024;
-
-const EXT_FROM_MIME: Record<string, string> = {
-  "image/png": "png",
-  "image/jpeg": "jpg",
-  "image/webp": "webp",
-  "image/avif": "avif",
-  "image/gif": "gif",
-};
 
 function isUploadBucket(value: unknown): value is UploadBucket {
   return typeof value === "string" && (UPLOAD_BUCKETS as readonly string[]).includes(value);
@@ -32,18 +24,23 @@ export async function uploadImageAction(formData: FormData): Promise<Result<{ ur
   if (!isUploadBucket(bucket)) return fail("Invalid upload target.");
   if (file.size === 0) return fail("Empty file.");
   if (file.size > MAX_BYTES) return fail("File exceeds 5 MB.");
-  if (!ALLOWED_MIME.has(file.type)) return fail(`Unsupported type: ${file.type || "unknown"}.`);
 
-  const ext = EXT_FROM_MIME[file.type] ?? "bin";
-  const path = `${randomUUID()}.${ext}`;
-
-  const supabase = createAdminClient();
+  // Sniff the actual bytes — never trust the browser Content-Type. SVG, HTML,
+  // and other potentially script-bearing files are blocked here even though
+  // bucket allowed_mime_types should also catch them; defence in depth.
   const buffer = Buffer.from(await file.arrayBuffer());
+  // Admin uploads accept AVIF in addition to the customer-facing set.
+  const identified = identifyImage(buffer, { allow: ["png", "jpeg", "webp", "avif"] });
+  if (!identified) return fail("File must be a PNG, JPEG, WebP, or AVIF image.");
+
+  const path = `${randomUUID()}.${identified.ext}`;
+  const supabase = createAdminClient();
 
   const { error: uploadErr } = await supabase.storage
     .from(bucket)
     .upload(path, buffer, {
-      contentType: file.type,
+      // contentType derived from sniffed bytes, not from upload header.
+      contentType: identified.mime,
       cacheControl: "31536000, immutable",
       upsert: false,
     });
@@ -56,7 +53,7 @@ export async function uploadImageAction(formData: FormData): Promise<Result<{ ur
     action: "storage.upload",
     entityType: "storage",
     entityId: `${bucket}/${path}`,
-    after: { bucket, path, size: file.size, type: file.type },
+    after: { bucket, path, size: file.size, type: identified.mime },
   });
 
   return ok({ url: urlData.publicUrl });
