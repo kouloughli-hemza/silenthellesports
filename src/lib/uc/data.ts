@@ -44,7 +44,8 @@ export async function getActiveUcPackages(): Promise<UcPackagePublic[]> {
 export async function getUcRequestPublic(
   requestNumber: string,
 ): Promise<UcRequestPublic | null> {
-  if (!/^UC-\d{4}-\d{3,}$/.test(requestNumber)) return null;
+  // Accepts both legacy sequential (UC-2026-0001) and new random (UC-2026-A1B2C3D4) formats.
+  if (!/^UC-\d{4}-[A-Z0-9]{3,16}$/.test(requestNumber)) return null;
   const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("uc_recharge_requests")

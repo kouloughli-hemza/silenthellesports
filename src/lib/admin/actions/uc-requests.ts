@@ -6,14 +6,10 @@ import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/admin/guard";
 import { recordAudit } from "@/lib/admin/audit";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { identifyImage } from "@/lib/utils/image-bytes";
 import { fail, ok, type Result } from "@/types/domain";
 import type { Update } from "@/types/database";
 
-const ALLOWED_DELIVERY_MIME = new Set([
-  "image/png",
-  "image/jpeg",
-  "image/webp",
-]);
 const MAX_DELIVERY_BYTES = 5 * 1024 * 1024;
 
 function revalidateBoth(requestNumber: string) {
@@ -78,17 +74,15 @@ export async function markDeliveredAction(
   const file = formData.get("delivery_screenshot");
   if (file instanceof File && file.size > 0) {
     if (file.size > MAX_DELIVERY_BYTES) return fail("Screenshot exceeds 5 MB.");
-    if (!ALLOWED_DELIVERY_MIME.has(file.type)) {
-      return fail(`Unsupported screenshot type: ${file.type || "unknown"}.`);
-    }
-    const ext = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
-    deliveryPath = `delivery/${id}/${randomUUID()}.${ext}`;
-    const supabase = createAdminClient();
     const buffer = Buffer.from(await file.arrayBuffer());
+    const identified = identifyImage(buffer);
+    if (!identified) return fail("Screenshot must be PNG, JPEG, or WebP.");
+    deliveryPath = `delivery/${id}/${randomUUID()}.${identified.ext}`;
+    const supabase = createAdminClient();
     const { error: uploadErr } = await supabase.storage
       .from("uc-proofs")
       .upload(deliveryPath, buffer, {
-        contentType: file.type,
+        contentType: identified.mime,
         cacheControl: "31536000, immutable",
         upsert: false,
       });

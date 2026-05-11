@@ -2,6 +2,7 @@ import { setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { isLocale, Link } from "@/lib/i18n/routing";
 import { getUcRequestPublic } from "@/lib/uc/data";
+import { maskPhone, maskPubgId } from "@/lib/uc/whatsapp";
 import { formatPrice, type Locale } from "@/types/domain";
 import { formatDateLong } from "@/lib/utils/format";
 
@@ -230,7 +231,10 @@ export default async function UcStatusPage({
       ) : null}
 
       <section className="mt-6 grid gap-3 sm:grid-cols-2">
-        <Detail label={isAr ? "معرّف PUBG" : "PUBG ID"} value={req.pubg_id} />
+        <Detail
+          label={isAr ? "معرّف PUBG" : "PUBG ID"}
+          value={maskPubgId(req.pubg_id)}
+        />
         <Detail label={isAr ? "اللقب" : "IGN"} value={req.ign} />
         <Detail
           label={isAr ? "طريقة الدفع" : "Payment method"}
@@ -244,9 +248,17 @@ export default async function UcStatusPage({
         ) : null}
         <Detail
           label={isAr ? "واتساب" : "WhatsApp"}
-          value={req.whatsapp_phone}
+          value={maskPhone(req.whatsapp_phone)}
         />
       </section>
+      <p
+        className="mt-2 font-mono text-[10px]"
+        style={{ color: "rgba(245,240,232,0.45)" }}
+      >
+        {isAr
+          ? "تم إخفاء جزء من رقم الهاتف ومعرّف PUBG للحماية. الإدارة ترى التفاصيل كاملة."
+          : "Phone and PUBG ID are partially hidden for privacy. Admin sees full details."}
+      </p>
 
       <p
         className="mt-8 font-mono text-[10px] leading-relaxed"

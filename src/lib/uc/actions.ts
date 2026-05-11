@@ -5,18 +5,12 @@ import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { getSessionUser } from "@/lib/auth/session";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { identifyImage } from "@/lib/utils/image-bytes";
 import { fail, ok, type Result } from "@/types/domain";
 import type { Insert } from "@/types/database";
 
-const PROOF_MIME_TO_EXT: Record<string, string> = {
-  "image/png": "png",
-  "image/jpeg": "jpg",
-  "image/webp": "webp",
-  "image/heic": "heic",
-  "image/heif": "heif",
-  "application/pdf": "pdf",
-};
 const MAX_PROOF_BYTES = 8 * 1024 * 1024; // matches bucket file_size_limit
+const MAX_SUBMISSIONS_PER_HOUR = 5;
 
 const SubmitSchema = z.object({
   package_id: z.string().uuid("Pick a package."),
@@ -85,10 +79,28 @@ export async function submitUcRechargeAction(
   if (proofFile.size > MAX_PROOF_BYTES) {
     return fail("Proof file exceeds 8 MB.");
   }
-  const ext = PROOF_MIME_TO_EXT[proofFile.type];
-  if (!ext) return fail(`Unsupported file type: ${proofFile.type || "unknown"}.`);
+  // Validate by actual file bytes — Content-Type from the browser is
+  // attacker-controlled. Only PNG / JPEG / WebP are accepted.
+  const proofBuffer = Buffer.from(await proofFile.arrayBuffer());
+  const identified = identifyImage(proofBuffer);
+  if (!identified) {
+    return fail("Proof must be a PNG, JPEG, or WebP image.");
+  }
 
   const admin = createAdminClient();
+
+  // Rate limit: cap submissions per user per hour to slow spam / abuse.
+  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+  const { count: recentCount } = await admin
+    .from("uc_recharge_requests")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", session.id)
+    .gte("created_at", oneHourAgo);
+  if ((recentCount ?? 0) >= MAX_SUBMISSIONS_PER_HOUR) {
+    return fail(
+      `Too many requests in the last hour (limit ${MAX_SUBMISSIONS_PER_HOUR}). Try again later.`,
+    );
+  }
 
   // 1. Re-fetch the package as source of truth for price + UC + active flag.
   const { data: pkg, error: pkgErr } = await admin
@@ -109,12 +121,13 @@ export async function submitUcRechargeAction(
   // path shape for direct uploads, but here we use the service-role admin
   // client so the policy is bypassed — we still keep the same convention so
   // the file is owned by the user logically.
-  const proofPath = `${session.id}/${randomUUID()}.${ext}`;
-  const buffer = Buffer.from(await proofFile.arrayBuffer());
+  const proofPath = `${session.id}/${randomUUID()}.${identified.ext}`;
   const { error: uploadErr } = await admin.storage
     .from("uc-proofs")
-    .upload(proofPath, buffer, {
-      contentType: proofFile.type,
+    .upload(proofPath, proofBuffer, {
+      // contentType derived from the sniffed bytes, not the upload header,
+      // so a spoofed Content-Type can't bypass bucket allowed_mime_types.
+      contentType: identified.mime,
       cacheControl: "31536000, immutable",
       upsert: false,
     });

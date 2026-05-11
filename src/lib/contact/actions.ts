@@ -28,7 +28,14 @@ export async function sendContactMessageAction(
     return ok({ delivered: true });
   }
 
-  const data = parsed.data;
+  // Strip CR/LF from any field that ends up in an email header (subject,
+  // replyTo) — header injection like "Subject\nBcc: ..." can't slip through
+  // even if Resend's SDK ever skipped its own escaping.
+  const data = {
+    ...parsed.data,
+    subject: parsed.data.subject.replace(/[\r\n]+/g, " ").slice(0, 160),
+    email: parsed.data.email.replace(/[\r\n]+/g, ""),
+  };
   const env = getServerEnv();
 
   const html = brandedTemplate({

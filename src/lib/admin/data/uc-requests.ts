@@ -53,7 +53,7 @@ export async function listUcRequests(
 export async function getUcRequestByNumber(
   requestNumber: string,
 ): Promise<UcRequest | null> {
-  if (!/^UC-\d{4}-\d{3,}$/.test(requestNumber)) return null;
+  if (!/^UC-\d{4}-[A-Z0-9]{3,16}$/.test(requestNumber)) return null;
   const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("uc_recharge_requests")

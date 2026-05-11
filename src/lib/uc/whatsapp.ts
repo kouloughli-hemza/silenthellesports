@@ -29,6 +29,25 @@ export function buildWhatsAppLink(phoneE164: string, message: string): string {
   return `https://wa.me/${phoneE164}?text=${encodeURIComponent(message)}`;
 }
 
+// Mask all but the last 4 digits of a phone — used on the public status page
+// so a leaked URL doesn't expose someone's full WhatsApp number.
+export function maskPhone(input: string): string {
+  const digits = input.replace(/\D/g, "");
+  if (digits.length <= 4) return "•".repeat(digits.length);
+  const last4 = digits.slice(-4);
+  return "•••• ".repeat(Math.max(1, Math.ceil((digits.length - 4) / 4))).trim() + " " + last4;
+}
+
+// Mask the middle of a PUBG ID, keep first 2 + last 3 digits visible.
+export function maskPubgId(input: string): string {
+  const digits = input.replace(/\D/g, "");
+  if (digits.length <= 5) return digits;
+  const head = digits.slice(0, 2);
+  const tail = digits.slice(-3);
+  const middle = "•".repeat(Math.max(3, digits.length - 5));
+  return `${head}${middle}${tail}`;
+}
+
 interface MessageContext {
   ign: string;
   pubg_id: string;

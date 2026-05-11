@@ -13,9 +13,14 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
-  const auth = request.headers.get("authorization");
   const expected = process.env.CRON_SECRET;
-  if (expected && auth !== `Bearer ${expected}`) {
+  if (!expected) {
+    // Without the secret configured we can't tell legit cron pings from
+    // anyone hitting the URL. Refuse rather than running open to abuse.
+    return NextResponse.json({ ok: false, error: "cron disabled" }, { status: 503 });
+  }
+  const auth = request.headers.get("authorization");
+  if (auth !== `Bearer ${expected}`) {
     return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
   }
 

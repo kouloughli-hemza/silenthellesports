@@ -257,7 +257,7 @@ export function UcRechargeForm({ packages, locale, i18n }: Props) {
           <input
             className="field"
             type="file"
-            accept="image/png,image/jpeg,image/webp,image/heic,image/heif,application/pdf"
+            accept="image/png,image/jpeg,image/webp"
             onChange={(e) => setProofFile(e.target.files?.[0] ?? null)}
             required
           />
