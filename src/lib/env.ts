@@ -26,7 +26,10 @@ const ServerEnvSchema = PublicEnvSchema.extend({
   YALIDINE_API_TOKEN: optionalStr,
   YALIDINE_FROM_WILAYA_CODE: z.coerce.number().int().min(1).max(58).default(16),
   RESEND_API_KEY: optionalStr,
-  RESEND_FROM_EMAIL: z.string().default("Silent Hell <noreply@silenthellesports.com>"),
+  // Use a real-looking inbox name — Gmail / Outlook downscore "noreply" /
+  // "no-reply" senders. "hello@" or "team@" reads as legitimate. The reply-to
+  // header on transactional emails still routes to the right person.
+  RESEND_FROM_EMAIL: z.string().default("Silent Hell Esports <hello@silenthellesports.com>"),
   CONTACT_TO_EMAIL: z.string().email().default("support@silenthellesports.com"),
   ADMIN_BOOTSTRAP_EMAIL: optionalEmail,
 });

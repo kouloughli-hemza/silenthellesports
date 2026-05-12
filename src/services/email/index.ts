@@ -20,7 +20,10 @@ export interface SendInput {
   to: string;
   subject: string;
   html: string;
-  text?: string;
+  // Required: every transactional email must have a plain-text alternative.
+  // Mail clients use it for accessibility, and Gmail/Outlook treat missing
+  // text/plain as a deliverability negative.
+  text: string;
   replyTo?: string;
 }
 
@@ -31,7 +34,7 @@ export async function sendEmail(input: SendInput): Promise<Result<{ id: string |
   if (!c) {
     // Dev fallback — log it so the developer can see what would have been sent.
     console.log("[email:mock] →", input.to, "·", input.subject);
-    if (input.text) console.log(input.text);
+    console.log(input.text);
     return ok({ id: null });
   }
 
@@ -41,7 +44,7 @@ export async function sendEmail(input: SendInput): Promise<Result<{ id: string |
       to: input.to,
       subject: input.subject,
       html: input.html,
-      ...(input.text ? { text: input.text } : {}),
+      text: input.text,
       ...(input.replyTo ? { replyTo: input.replyTo } : {}),
     });
     if (res.error) return fail(res.error.message);
