@@ -1,7 +1,6 @@
 import { setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { isLocale, Link } from "@/lib/i18n/routing";
-import { getSessionUser } from "@/lib/auth/session";
 import { getSiteConfig } from "@/lib/site-config";
 import { getActiveUcPackages } from "@/lib/uc/data";
 import { UcRechargeForm } from "./uc-recharge-form";
@@ -20,8 +19,7 @@ export default async function UcRechargePage({
   setRequestLocale(locale);
 
   const isAr = locale === "ar";
-  const [session, packages, ucAccounts] = await Promise.all([
-    getSessionUser(),
+  const [packages, ucAccounts] = await Promise.all([
     getActiveUcPackages(),
     getSiteConfig("payment.uc_accounts"),
   ]);
@@ -116,23 +114,19 @@ export default async function UcRechargePage({
 
       <PaymentInstructions isAr={isAr} ucAccounts={ucAccounts} />
 
-      {session ? (
-        <div
-          className="notch p-6"
-          style={{
-            background: "var(--ash-1)",
-            border: "1px solid rgba(230,0,19,0.25)",
-          }}
-        >
-          <UcRechargeForm
-            packages={packages}
-            locale={locale === "ar" ? "ar" : "en"}
-            i18n={formI18n}
-          />
-        </div>
-      ) : (
-        <SignInGate isAr={isAr} locale={locale} />
-      )}
+      <div
+        className="notch p-6"
+        style={{
+          background: "var(--ash-1)",
+          border: "1px solid rgba(230,0,19,0.25)",
+        }}
+      >
+        <UcRechargeForm
+          packages={packages}
+          locale={locale === "ar" ? "ar" : "en"}
+          i18n={formI18n}
+        />
+      </div>
     </article>
   );
 }
@@ -307,31 +301,3 @@ function AccountCard({
   );
 }
 
-function SignInGate({ isAr, locale }: { isAr: boolean; locale: string }) {
-  const localePrefix = locale === "ar" ? "/ar" : "/en";
-  const href = `${localePrefix}/login?next=${encodeURIComponent(`${localePrefix}/uc-recharge`)}`;
-  return (
-    <div
-      className="flex flex-col items-start gap-4 p-6"
-      style={{
-        background: "var(--ash-3)",
-        border: "1px solid rgba(230,0,19,0.25)",
-      }}
-    >
-      <div className="font-display text-2xl leading-tight font-black uppercase italic md:text-3xl">
-        {isAr ? "سجّل الدخول لإرسال طلب" : "Sign in to submit a request"}
-      </div>
-      <p
-        className="text-sm leading-relaxed"
-        style={{ color: "rgba(245,240,232,0.7)" }}
-      >
-        {isAr
-          ? "نطلب حساب Google لربط طلبك بك ولتجنب الإساءة."
-          : "We require a Google account so we can link the request to you and prevent abuse."}
-      </p>
-      <a href={href} className="btn-hell">
-        {isAr ? "تسجيل الدخول" : "SIGN IN"}
-      </a>
-    </div>
-  );
-}

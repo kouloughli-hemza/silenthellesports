@@ -371,7 +371,7 @@ export type Database = {
         Row: {
           id: string;
           request_number: string;
-          user_id: string;
+          user_id: string | null;
           package_id: string;
           uc_amount_snapshot: number;
           bonus_uc_snapshot: number;
@@ -392,13 +392,14 @@ export type Database = {
           admin_notes: string | null;
           delivery_screenshot_url: string | null;
           rejection_reason: string | null;
+          submitter_ip: string | null;
           created_at: string;
           updated_at: string;
         };
         Insert: {
           id?: string;
           request_number?: string;
-          user_id: string;
+          user_id?: string | null;
           package_id: string;
           uc_amount_snapshot: number;
           bonus_uc_snapshot?: number;
@@ -419,13 +420,14 @@ export type Database = {
           admin_notes?: string | null;
           delivery_screenshot_url?: string | null;
           rejection_reason?: string | null;
+          submitter_ip?: string | null;
           created_at?: string;
           updated_at?: string;
         };
         Update: {
           id?: string;
           request_number?: string;
-          user_id?: string;
+          user_id?: string | null;
           package_id?: string;
           uc_amount_snapshot?: number;
           bonus_uc_snapshot?: number;
@@ -446,6 +448,7 @@ export type Database = {
           admin_notes?: string | null;
           delivery_screenshot_url?: string | null;
           rejection_reason?: string | null;
+          submitter_ip?: string | null;
           created_at?: string;
           updated_at?: string;
         };
